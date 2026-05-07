@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const workshopScript = fs.readFileSync(new URL('../data/workshop-orange.js', import.meta.url), 'utf8');
 const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
 assert.ok(script, 'index.html should contain an inline script');
 
@@ -11,8 +12,9 @@ new vm.Script(script, { filename: 'index-inline.js' });
 const dataScript = script.match(/const D=\[[\s\S]*?;\s*\n\s*const RT=\[[\s\S]*?\];/)?.[0];
 assert.ok(dataScript, 'word data should be extractable');
 
-const sandbox = {};
+const sandbox = { window: {} };
 vm.createContext(sandbox);
+vm.runInContext(workshopScript, sandbox);
 vm.runInContext(dataScript + '\nthis.D=D; this.RT=RT;', sandbox);
 
 const requiredWords = [
@@ -40,5 +42,9 @@ assert.ok(html.includes('复习提醒'), 'UI should include adaptive review remi
 assert.ok(html.includes('同义词'), 'flashcards should render synonyms');
 assert.ok(html.includes('反义词'), 'flashcards should render antonyms');
 assert.ok(html.includes('visual-card'), 'flashcards should render visual image cards');
+assert.ok(html.includes('同义词练习'), 'UI should include the synonym exercise module');
+assert.ok(html.includes('反义词练习'), 'UI should include the antonym exercise module');
+assert.ok(sandbox.window.WORKSHOP_ORANGE.length >= 150, 'PDF extraction should provide the broader book vocabulary');
+assert.ok(sandbox.D.length >= 180, 'app should merge the broader book vocabulary into the runtime word database');
 
 console.log(`Validated ${sandbox.D.length} words and ${sandbox.RT.length} root-map nodes.`);

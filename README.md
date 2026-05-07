@@ -10,6 +10,7 @@ Live site: https://word-world-phi.vercel.app/
 - Root and affix breakdown with animated word-part cards
 - Membean-style root star map with connected word families and adaptive review reminders
 - Practice loop with listening choice questions and dictation
+- Dedicated synonym and antonym exercise modules generated from Vocabulary Workshop Level Orange relationship data
 - Quizlet-style mini games: matching, spelling puzzle, and timed challenge
 - Daily XP goal, streak tracking, level progress, achievements, and skill tree
 - Automatic wrong-word tracking with error analysis
@@ -30,3 +31,11 @@ Then visit `http://localhost:5173`.
 ```bash
 node tools/validate-app.mjs
 ```
+
+To regenerate the Vocabulary Workshop relationship data from the local PDF:
+
+```bash
+python -X utf8 tools/extract-workshop-orange.py
+```
+
+The generated `data/workshop-orange.js` stores vocabulary relationship facts and the app creates original practice questions from those facts.

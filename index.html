@@ -254,12 +254,21 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 .sk-line{width:3px;height:16px;background:var(--bg4);border-radius:2px}.sk-line.done{background:var(--grn)}
 .sk-label{font-size:10px;font-weight:700;color:var(--tx2);margin-top:-4px}
 
+/* Synonym / Antonym drills */
+.lex{max-width:760px;margin:0 auto}.lex-head{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.lex-stat{background:var(--bg2);border:2px solid var(--bg3);border-radius:12px;padding:12px;text-align:center}.lex-stat .v{font-size:20px;font-weight:900;color:var(--blu)}.lex-stat .l{font-size:10px;font-weight:800;color:var(--tx3)}
+.lex-card{background:var(--bg2);border:3px solid var(--bg3);border-radius:var(--r2);padding:24px;box-shadow:var(--sh)}
+.lex-mode{display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}.lex-mode button{padding:6px 14px;border-radius:16px;border:2px solid var(--bg3);background:#fff;font-family:inherit;font-weight:800;font-size:11px;color:var(--tx2);cursor:pointer}.lex-mode button.on{background:var(--blu3);border-color:var(--blu);color:var(--blu)}
+.lex-prompt{text-align:center;margin-bottom:18px}.lex-word{font-size:30px;font-weight:900;margin-bottom:4px}.lex-sub{font-size:12px;color:var(--tx2);line-height:1.6}.lex-sub strong{color:var(--tx)}
+.lex-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lex-opt{background:#fff;border:3px solid var(--bg3);border-bottom:5px solid var(--bg4);border-radius:12px;padding:13px;font-family:inherit;font-size:13px;font-weight:800;color:var(--tx);text-align:left;cursor:pointer}.lex-opt:hover{border-color:var(--blu)}.lex-opt.ok{border-color:var(--grn);border-bottom-color:var(--grn2);background:var(--grn3);color:var(--grn2)}.lex-opt.ng{border-color:var(--red);border-bottom-color:var(--red2);background:var(--red3);color:var(--red2)}
+.lex-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}.lex-note{font-size:11px;color:var(--tx2)}.lex-next{background:var(--grn);border:none;border-bottom:4px solid var(--grn2);color:#fff;border-radius:12px;padding:9px 16px;font-family:inherit;font-weight:900;cursor:pointer}.lex-next:active{border-bottom-width:1px;transform:translateY(3px)}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .side{transform:translateX(-100%)}.side.op{transform:translateX(0);box-shadow:var(--sh2)}
   .mn{margin-left:0}.cnt{padding:12px}.top{padding:8px 14px}.cf{padding:8px 14px 0}
   .gg{grid-template-columns:1fr 1fr}.mg{grid-template-columns:repeat(3,1fr)}
-  .qos,.tmos{grid-template-columns:1fr}.as{grid-template-columns:repeat(2,1fr)}.ea-grid{grid-template-columns:1fr 1fr 1fr}
+  .qos,.tmos,.lex-opts{grid-template-columns:1fr}.as{grid-template-columns:repeat(2,1fr)}.ea-grid{grid-template-columns:1fr 1fr 1fr}.lex-head{grid-template-columns:1fr}
   .ham{display:block}
 }
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:99}.ov.sh{display:block}
@@ -278,6 +287,8 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
     <div class="s-dv"></div>
     <div class="s-cat">练习</div>
     <div class="s-it" onclick="go('qz',this)"><span class="ic">🎧</span>听写 & 选择</div>
+    <div class="s-it" onclick="go('syn',this)"><span class="ic">🔁</span>同义词练习</div>
+    <div class="s-it" onclick="go('ant',this)"><span class="ic">↔</span>反义词练习</div>
     <div class="s-it" onclick="go('gm',this)"><span class="ic">🎮</span>趣味练习</div>
     <div class="s-dv"></div>
     <div class="s-cat">记录</div>
@@ -314,12 +325,15 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
     <div class="sec" id="s-sm"><div class="sh"><h2>🌌 词根星空图</h2><p>Membean式星座可视化 · 点击探索词汇宇宙</p></div><div class="smc"><canvas id="smC"></canvas><div class="sm-lg"><div><span style="background:#ce82ff"></span>前缀</div><div><span style="background:#1cb0f6"></span>词根</div><div><span style="background:#58cc02"></span>后缀</div><div><span style="background:#ffc800"></span>已掌握</div></div><div class="sm-i" id="smI"><h3 id="smT"></h3><div class="tp" id="smTp"></div><div class="mn2" id="smM"></div><div class="sw" id="smW"></div></div></div></div>
     <div class="sec" id="s-bd"><div class="sh"><h2>🔬 词根拆解</h2><p>拆分结构 · 动画演示 · 举一反三</p></div><div class="bdc"><div class="bds"><input id="bdi" placeholder="输入单词，如 resilient…" onkeydown="if(event.key==='Enter')bdG()"><button onclick="bdG()">拆 解</button></div><div class="bdr" id="bdR"></div></div></div>
     <div class="sec" id="s-qz"><div class="sh"><h2>🎧 听写 & 选择题</h2><p>切换模式 · 练习闭环 · 巩固记忆</p></div><div class="qc"><div class="qtt"><button class="qtb on" onclick="sqm('c',this)">📝 选择题</button><button class="qtb" onclick="sqm('d',this)">🎧 听写</button></div><div class="qcd" id="qC"></div></div></div>
+    <div class="sec" id="s-syn"><div class="sh"><h2>🔁 同义词练习</h2><p>按 Vocabulary Workshop 风格生成 · 选出最接近的词义</p></div><div class="lex" id="synC"></div></div>
+    <div class="sec" id="s-ant"><div class="sh"><h2>↔ 反义词练习</h2><p>按 Vocabulary Workshop 风格生成 · 找出意思相反的词</p></div><div class="lex" id="antC"></div></div>
     <div class="sec" id="s-gm"><div class="sh"><h2>🎮 趣味练习</h2><p>Quizlet式游戏学习 · 让背单词不枯燥</p></div><div id="gM"><div class="gg"><div class="gc" onclick="sG('ma')"><div class="gi">🔗</div><div class="gt">连连看</div><div class="gd">配对英文与中文释义</div></div><div class="gc" onclick="sG('pz')"><div class="gi">🧩</div><div class="gt">拼字游戏</div><div class="gd">根据提示拼出单词</div></div><div class="gc" onclick="sG('tm')"><div class="gi">⚡</div><div class="gt">限时挑战</div><div class="gd">60秒看谁答得多</div></div></div></div><div id="gP" style="display:none"><div class="ga" id="gA"></div></div></div>
     <div class="sec" id="s-wb"><div class="sh"><h2>📕 错题本 & 数据分析</h2><p>XP体系错题追踪 · 数据驱动复习</p></div><div id="wbC"></div></div>
     <div class="sec" id="s-ac"><div class="sh"><h2>🏆 成就系统 & 技能树</h2><p>多邻国式打卡 · XP成长体系</p></div><div id="aC"></div></div>
   </div>
 </div>
 </div>
+<script src="data/workshop-orange.js"></script>
 <script>
 // ====== WORD DATABASE ======
 const D=[
@@ -408,6 +422,21 @@ const D=[
 {w:"dispose",ph:"/dɪˈspoʊz/",ps:"v.",em:"🧺",c:"ww",m:"<strong>放置；安排；处理</strong>",ms:"处理/安排",ex:"We were told to <em>dispose</em> our bags under our seats.",img:"Bags neatly placed under seats.",syn:["arrange","order","organize"],ant:["disturb","scatter","disorganize"],rt:[{t:"prefix",x:"dis-",m:"分开"},{t:"root",x:"pose",m:"放"}],ep:"把东西分开放好→安排/处理",rl:["position","deposit","compose"],rev:{box:1,due:0}}
 ].map(w=>({...w,img:w.img||`${w.em||'✨'} visual memory scene for ${w.w}`,syn:w.syn||w.rl||["related word"],ant:w.ant||["opposite idea"],rev:w.rev||{box:1,due:0}}));
 
+(window.WORKSHOP_ORANGE||[]).forEach((b,i)=>{
+  const old=D.find(w=>w.w===b.w);
+  if(old){
+    old.syn=[...new Set([...(old.syn||[]),...(b.syn||[])])];
+    old.ant=[...new Set([...(old.ant||[]),...(b.ant||[])])];
+    old.book=true;old.ps=old.ps||b.ps;
+  }else{
+    D.push({w:b.w,ph:"",ps:b.ps||"word",em:["📘","🔁","↔","⭐"][i%4],c:"vw",book:true,
+      m:`<strong>${b.w}</strong>：同义词 ${(b.syn||[]).slice(0,3).join(", ")||"related idea"}；反义词 ${(b.ant||[]).slice(0,3).join(", ")||"opposite idea"}`,
+      ms:(b.syn&&b.syn[0])?b.syn[0]:b.w,ex:`Choose the word that best matches or contrasts with <em>${b.w}</em>.`,
+      img:`A Vocabulary Workshop card for ${b.w}.`,syn:(b.syn&&b.syn.length)?b.syn:["related idea"],ant:(b.ant&&b.ant.length)?b.ant:["opposite idea"],rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
+      ep:`用同义词和反义词建立词义边界。`,rl:[...(b.syn||[]).slice(0,3),...(b.ant||[]).slice(0,2)],rev:{box:1,due:0}});
+  }
+});
+
 const RT=[
 {r:"scrib/script",m:"写 write",t:"root",ws:["circumscribe","describe","inscribe"]},
 {r:"vol",m:"意愿 will",t:"root",ws:["benevolent","volunteer"]},
@@ -458,13 +487,14 @@ function noteReview(word,ok){const r=S.rv[word]||{box:1,interval:0,ease:2.3,reps
   r.reps=ok?(r.reps||0)+1:0;r.ease=Math.max(1.3,(r.ease||2.3)+(ok?.12:-.28));r.interval=ok?Math.max(1,Math.round(((r.interval||0)||1)*r.ease)):1;r.box=ok?Math.min(5,(r.box||1)+1):1;r.due=Date.now()+r.interval*864e5;S.rv[word]=r;sv()}
 
 // ====== NAV ======
-const TT={fc:'📇 单词闪卡',sm:'🌌 词根星空图',bd:'🔬 词根拆解',qz:'🎧 听写 & 选择',gm:'🎮 趣味练习',wb:'📕 错题本',ac:'🏆 成就系统'};
+const TT={fc:'📇 单词闪卡',sm:'🌌 词根星空图',bd:'🔬 词根拆解',qz:'🎧 听写 & 选择',syn:'🔁 同义词练习',ant:'↔ 反义词练习',gm:'🎮 趣味练习',wb:'📕 错题本',ac:'🏆 成就系统'};
 function go(s,el){
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('on'));
   document.getElementById('s-'+s).classList.add('on');
   document.querySelectorAll('.s-it').forEach(x=>x.classList.remove('on'));if(el)el.classList.add('on');
   document.getElementById('ttl').textContent=TT[s]||'';
-  document.getElementById('cflt').style.display=['fc','qz','gm'].includes(s)?'flex':'none';
+  document.getElementById('cflt').style.display=['fc','qz','gm','syn','ant'].includes(s)?'flex':'none';
+  if(s==='syn')initLex('syn');if(s==='ant')initLex('ant');
   if(s==='sm')setTimeout(initSM,80);if(s==='qz')initQ();if(s==='wb')rWB();if(s==='ac')rAC();
   if(s==='gm'){document.getElementById('gM').style.display='';document.getElementById('gP').style.display='none'}
   if(s==='bd')bdI();clS()
@@ -561,6 +591,24 @@ function dC(){if(S.qa)return;S.qa=true;const inp=document.getElementById('dI');i
 function rQR(){const pct=Math.round(S.qs/S.qw.length*100);const cls=pct>=80?'g':pct>=50?'m':'b';const msg=pct>=80?'🎉 太棒了！':pct>=50?'👍 继续加油！':'💪 多练几次！';
   if(pct===100)S.bg.perfect=true;
   document.getElementById('qC').innerHTML=`<div class="rc"><div class="rs ${cls}">${pct}%</div><div class="rm">${msg}</div><div class="rsb">答对 ${S.qs}/${S.qw.length}</div><div class="rxp">⚡ +${S.qs*(S.qm==='d'?15:10)} XP</div><br><button class="btn btn-g" onclick="initQ()">再来一轮</button></div>`;sv()}
+
+// ====== SYNONYM / ANTONYM WORKSHOP ======
+let L={syn:{mode:'word',i:0,ok:0,total:0,cur:null,done:false},ant:{mode:'word',i:0,ok:0,total:0,cur:null,done:false}};
+function lexWords(type){return D.filter(w=>Array.isArray(w[type])&&w[type].length&&w.w&&w.syn?.length&&w.ant?.length)}
+function lexAll(type){return [...new Set(lexWords(type).flatMap(w=>w[type]).filter(Boolean))]}
+function initLex(type){const st=L[type];st.i=0;st.ok=0;st.total=10;st.done=false;rLex(type)}
+function setLexMode(type,mode){L[type].mode=mode;initLex(type)}
+function mkLex(type){const pool=shuf(lexWords(type));const w=pool[0]||D[0],ans=shuf([...(w[type]||[])])[0];const all=lexAll(type==='syn'?'syn':'ant').filter(x=>x!==ans&&!w[type].includes(x));
+  const opts=shuf([ans,...shuf(all).slice(0,3)]);return{w,ans,opts,type,mode:L[type].mode}}
+function rLex(type){const st=L[type],box=document.getElementById(type+'C');if(!box)return;const pool=lexWords(type),book=pool.filter(w=>w.book).length,allTerms=lexAll(type).length;
+  if(st.done){const pct=Math.round(st.ok/st.total*100);box.innerHTML=`<div class="lex-head"><div class="lex-stat"><div class="v">${pool.length}</div><div class="l">可练单词</div></div><div class="lex-stat"><div class="v">${book}</div><div class="l">来自本书</div></div><div class="lex-stat"><div class="v">${allTerms}</div><div class="l">${type==='syn'?'同义词':'反义词'}关系</div></div></div><div class="lex-card"><div class="rc"><div class="rs ${pct>=80?'g':pct>=50?'m':'b'}">${pct}%</div><div class="rm">本轮${type==='syn'?'同义词':'反义词'}练习完成</div><div class="rsb">答对 ${st.ok}/${st.total}</div><button class="btn btn-g" onclick="initLex('${type}')">再来一轮</button></div></div>`;return}
+  st.cur=mkLex(type);const q=st.cur,label=type==='syn'?'同义词':'反义词',verb=type==='syn'?'意思最接近':'意思相反';
+  const prompt=q.mode==='context'?`在句子中，哪个词可以和 <strong>${q.w.w}</strong> ${type==='syn'?'互换':'形成对比'}？`:`选择与 <strong>${q.w.w}</strong> ${verb}的词。`;
+  box.innerHTML=`<div class="lex-head"><div class="lex-stat"><div class="v">${pool.length}</div><div class="l">可练单词</div></div><div class="lex-stat"><div class="v">${book}</div><div class="l">来自本书</div></div><div class="lex-stat"><div class="v">${allTerms}</div><div class="l">${label}关系</div></div></div><div class="lex-card"><div class="lex-mode"><button class="${q.mode==='word'?'on':''}" onclick="setLexMode('${type}','word')">单词辨析</button><button class="${q.mode==='context'?'on':''}" onclick="setLexMode('${type}','context')">语境替换</button></div><div class="lex-prompt"><div class="lex-word">${q.w.em||'📘'} ${q.w.w}</div><div class="lex-sub">${prompt}<br>${q.w.ps||''} · ${q.w.ms||''}</div></div><div class="lex-opts">${q.opts.map(o=>`<button class="lex-opt" onclick="aLex('${type}',this,'${encodeURIComponent(o)}')" data-a="${encodeURIComponent(o)}">${esc(o)}</button>`).join('')}</div><div class="lex-foot"><div class="lex-note">第 ${st.i+1}/${st.total} 题 · 答错会进入错题本</div><button class="lex-next" onclick="nLex('${type}')">跳过</button></div></div>`}
+function aLex(type,el,choice){choice=decodeURIComponent(choice);const st=L[type],q=st.cur;if(!q||el.dataset.done)return;document.querySelectorAll(`#${type}C .lex-opt`).forEach(b=>{b.dataset.done='1';if(decodeURIComponent(b.dataset.a)===q.ans)b.classList.add('ok')});
+  if(choice===q.ans){st.ok++;noteReview(q.w.w,true);addXP(type==='syn'?8:9)}else{el.classList.add('ng');S.wr[q.w.w]=(S.wr[q.w.w]||0)+1;noteReview(q.w.w,false);uTB();sv()}
+  setTimeout(()=>nLex(type),850)}
+function nLex(type){const st=L[type];st.i++;if(st.i>=st.total)st.done=true;rLex(type)}
 
 // ====== GAMES ======
 function sG(g){document.getElementById('gM').style.display='none';document.getElementById('gP').style.display='';
