@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VocabStar · 词星</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Code:wght@400;600&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f6f4ef;--bg2:#fff;--bg3:#ebe8e1;--bg4:#d9d5cc;
+  --tx:#2b2723;--tx2:#6d675f;--tx3:#a09a90;
+  --grn:#58cc02;--grn2:#46a302;--grn3:#d7ffb8;
+  --blu:#1cb0f6;--blu2:#1899d6;--blu3:#ddf4fe;
+  --pur:#ce82ff;--pur2:#a855d6;--pur3:#f3e0ff;
+  --org:#ff9600;--org2:#cd7900;--org3:#fff1d6;
+  --red:#ff4b4b;--red2:#ea2b2b;--red3:#ffd6d6;
+  --gld:#ffc800;--gld2:#daa800;
+  --cyn:#00e5ff;
+  --r1:16px;--r2:20px;--r3:28px;
+  --sh:0 4px 14px rgba(0,0,0,.07);--sh2:0 6px 24px rgba(0,0,0,.1);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+
+/* === LAYOUT === */
+.app{display:flex;min-height:100vh}
+.side{width:220px;background:var(--bg2);border-right:2px solid var(--bg3);position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;padding:14px 10px;overflow-y:auto;transition:transform .3s}
+.mn{flex:1;margin-left:220px;min-height:100vh}
+
+/* SIDEBAR */
+.s-logo{display:flex;align-items:center;gap:9px;padding:6px 10px;margin-bottom:18px}
+.s-logo-i{width:36px;height:36px;background:linear-gradient(135deg,var(--grn),#00c853);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff}
+.s-logo-t{font-size:18px;font-weight:900}.s-logo-t span{color:var(--grn)}
+.s-nav{flex:1;display:flex;flex-direction:column;gap:1px}
+.s-it{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:11px;cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);border:2px solid transparent;position:relative;transition:all .15s}
+.s-it:hover{background:var(--bg);color:var(--tx)}
+.s-it.on{background:var(--blu3);color:var(--blu);border-color:var(--blu)}
+.s-it .ic{font-size:17px;width:24px;text-align:center}
+.s-it .bdg{position:absolute;right:8px;background:var(--red);color:#fff;font-size:9px;font-weight:900;padding:1px 6px;border-radius:8px}
+.s-dv{height:1px;background:var(--bg3);margin:8px 6px}
+.s-cat{font-size:9px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;padding:6px 13px}
+
+/* TOPBAR */
+.top{position:sticky;top:0;z-index:90;background:rgba(246,244,239,.9);backdrop-filter:blur(10px);border-bottom:2px solid var(--bg3);padding:10px 24px;display:flex;align-items:center;justify-content:space-between}
+.top-l{display:flex;align-items:center;gap:10px}
+.top-t{font-size:17px;font-weight:900}
+.top-r{display:flex;align-items:center;gap:14px}
+.ts{display:flex;align-items:center;gap:4px;font-weight:800;font-size:13px}
+.ts.xp{color:var(--org)}.ts.sk{color:var(--red)}.ts.lv{color:var(--pur)}
+.xpb{width:80px;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.xpf{height:100%;background:linear-gradient(90deg,var(--org),var(--gld));border-radius:4px;transition:width .5s}
+.ham{display:none;background:none;border:none;font-size:22px;cursor:pointer}
+
+/* DAILY PROGRESS BAR (Duolingo style) */
+.daily-bar{padding:10px 24px;background:var(--bg2);border-bottom:2px solid var(--bg3)}
+.daily-inner{display:flex;align-items:center;gap:12px;max-width:800px;margin:0 auto}
+.daily-label{font-size:11px;font-weight:800;color:var(--tx2);white-space:nowrap}
+.daily-track{flex:1;height:14px;background:var(--bg3);border-radius:7px;overflow:hidden;position:relative}
+.daily-fill{height:100%;border-radius:7px;background:linear-gradient(90deg,var(--grn),#7ce53a);transition:width .6s;position:relative}
+.daily-fill::after{content:'';position:absolute;top:2px;left:4px;right:4px;height:4px;background:rgba(255,255,255,.3);border-radius:2px}
+.daily-goal{font-size:12px;font-weight:800;color:var(--grn2);white-space:nowrap}
+.daily-streak{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:800;color:var(--org);white-space:nowrap;background:var(--org3);padding:4px 10px;border-radius:10px}
+
+/* CATEGORY FILTER */
+.cf{display:flex;gap:6px;padding:12px 24px 0;flex-wrap:wrap}
+.cfb{padding:6px 14px;border-radius:20px;border:2px solid var(--bg3);background:var(--bg2);font-family:inherit;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;transition:all .15s}
+.cfb:hover{border-color:var(--blu)}.cfb.on{background:var(--blu);border-color:var(--blu);color:#fff}
+.cfb .n{font-size:10px;opacity:.6;margin-left:2px}
+
+/* CONTENT */
+.cnt{padding:18px 24px 50px}
+.sec{display:none}.sec.on{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sh{margin-bottom:22px}.sh h2{font-size:22px;font-weight:900;margin-bottom:2px}.sh p{color:var(--tx2);font-size:12px}
+
+/* === BUTTONS === */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-bottom:4px solid;padding:11px 24px;border-radius:13px;font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;transition:all .08s;user-select:none}
+.btn:active{border-bottom-width:0;transform:translateY(4px)}
+.btn-g{background:var(--grn);border-bottom-color:var(--grn2);color:#fff}
+.btn-b{background:var(--blu);border-bottom-color:var(--blu2);color:#fff}
+.btn-o{background:var(--org);border-bottom-color:var(--org2);color:#fff}
+.btn-w{background:var(--bg2);border-bottom-color:var(--bg4);color:var(--tx)}
+
+/* === FLASHCARD === */
+.fca{display:flex;flex-direction:column;align-items:center;gap:22px}
+.fcw{perspective:1200px;width:100%;max-width:480px}
+.fc{width:100%;min-height:340px;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,.2,.2,1);cursor:pointer}
+.fc.fl{transform:rotateY(180deg)}
+.ff{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r3);overflow:hidden;display:flex;flex-direction:column}
+.ff-f{background:var(--bg2);border:3px solid var(--bg3);box-shadow:var(--sh2),0 3px 0 var(--bg4)}
+.ff-b{background:var(--bg2);border:3px solid var(--blu);transform:rotateY(180deg);box-shadow:var(--sh2),0 3px 0 var(--blu2);overflow-y:auto}
+.ff-in{padding:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:6px}
+.f-em{font-size:52px;margin-bottom:10px}
+.f-w{font-size:34px;font-weight:900;letter-spacing:-.5px}
+.f-ph{font-family:'Fira Code',monospace;font-size:14px;color:var(--blu)}
+.f-ps{font-size:11px;color:var(--tx3);font-weight:700;background:var(--bg);padding:3px 12px;border-radius:14px}
+.f-bg{position:absolute;top:12px;right:12px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:7px;text-transform:uppercase;letter-spacing:.5px}
+.f-bg.ww{background:var(--grn3);color:var(--grn2)}.f-bg.vw{background:var(--pur3);color:var(--pur2)}.f-bg.il{background:var(--org3);color:var(--org2)}.f-bg.iu{background:var(--blu3);color:var(--blu2)}
+.f-tap{position:absolute;bottom:12px;font-size:11px;color:var(--tx3);font-weight:600}
+.fb-in{padding:22px;display:flex;flex-direction:column;gap:10px}
+.fb-w{font-size:20px;font-weight:900}.fb-ph{font-family:'Fira Code',monospace;font-size:12px;color:var(--blu)}
+.fb-rs{display:flex;gap:4px;flex-wrap:wrap}
+.fb-r{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700}
+.fb-r.prefix{background:var(--pur3);color:var(--pur2)}.fb-r.root{background:var(--blu3);color:var(--blu2)}.fb-r.suffix{background:var(--grn3);color:var(--grn2)}
+.fb-m{font-size:14px;line-height:1.6}.fb-m strong{color:var(--grn2)}
+.fb-ex{font-size:12px;color:var(--tx2);line-height:1.7;padding:12px;background:var(--bg);border-radius:11px;border-left:3px solid var(--blu)}.fb-ex em{color:var(--blu);font-style:normal;font-weight:700}
+
+/* FC Controls */
+.fcc{display:flex;gap:10px;align-items:center}
+.fcb{width:48px;height:48px;border-radius:50%;border:3px solid var(--bg3);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .12s;box-shadow:0 3px 0 var(--bg4)}
+.fcb:hover{transform:translateY(-2px)}.fcb:active{transform:translateY(2px);box-shadow:none}
+.fcb.ok{border-color:var(--grn);color:var(--grn)}.fcb.ok:hover{background:var(--grn3)}
+.fcb.no{border-color:var(--red);color:var(--red)}.fcb.no:hover{background:var(--red3)}
+.fcb.sp{border-color:var(--blu);color:var(--blu)}.fcb.sp:hover{background:var(--blu3)}
+.fcn{font-family:'Fira Code',monospace;font-size:12px;color:var(--tx3);font-weight:700;min-width:50px;text-align:center}
+
+/* === STARMAP === */
+.smc{width:100%;height:calc(100vh - 200px);min-height:460px;border-radius:var(--r3);overflow:hidden;background:radial-gradient(ellipse at 35% 35%,#101e42,#080e22 55%,#030508);border:2px solid rgba(255,255,255,.05);position:relative}
+.smc canvas{width:100%;height:100%;cursor:crosshair}
+.sm-i{position:absolute;top:14px;right:14px;background:rgba(6,10,24,.92);backdrop-filter:blur(14px);border-radius:14px;padding:18px;max-width:250px;border:1px solid rgba(28,176,246,.2);display:none;color:#e0e4f0}
+.sm-i.show{display:block;animation:fi .25s}
+.sm-i h3{font-size:17px;font-weight:800;margin-bottom:1px}
+.sm-i .tp{font-family:'Fira Code',monospace;font-size:10px;color:var(--cyn);margin-bottom:8px}
+.sm-i .mn2{font-size:12px;color:#8a92b8;margin-bottom:10px;line-height:1.5}
+.sm-i .sw{display:flex;flex-wrap:wrap;gap:4px}
+.sm-i .swt{background:rgba(28,176,246,.12);color:var(--blu);font-size:10px;padding:3px 8px;border-radius:7px;cursor:pointer;font-weight:700;border:1px solid transparent;transition:all .15s}
+.sm-i .swt:hover{border-color:var(--blu)}
+.sm-lg{position:absolute;bottom:12px;left:12px;background:rgba(6,10,24,.82);border-radius:9px;padding:8px 12px;font-size:9px;color:#7880a0}
+.sm-lg div{display:flex;align-items:center;gap:5px;margin-bottom:1px}
+.sm-lg span{display:inline-block;width:7px;height:7px;border-radius:50%}
+
+/* === BREAKDOWN === */
+.bdc{max-width:640px;margin:0 auto}
+.bds{display:flex;gap:8px;margin-bottom:22px}
+.bds input{flex:1;background:var(--bg2);border:3px solid var(--bg3);border-radius:12px;padding:11px 16px;font-size:15px;font-family:inherit;font-weight:600;color:var(--tx);outline:none;box-shadow:0 3px 0 var(--bg4)}.bds input:focus{border-color:var(--blu)}
+.bds button{background:var(--blu);border:none;border-bottom:4px solid var(--blu2);color:#fff;padding:11px 22px;border-radius:12px;font-family:inherit;font-weight:800;cursor:pointer;font-size:14px}.bds button:active{border-bottom-width:0;transform:translateY(4px)}
+.bdr{background:var(--bg2);border:2px solid var(--bg3);border-radius:var(--r2);padding:26px;box-shadow:var(--sh)}
+.bd-w{font-size:28px;font-weight:900;text-align:center;margin-bottom:18px}
+.bd-ps{display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.bd-p{padding:10px 16px;border-radius:12px;text-align:center;min-width:65px;border:2px solid;transition:transform .2s;cursor:default}
+.bd-p:hover{transform:translateY(-3px)}
+.bd-p.prefix{background:var(--pur3);border-color:rgba(165,96,232,.25)}.bd-p.root{background:var(--blu3);border-color:rgba(28,176,246,.25)}.bd-p.suffix{background:var(--grn3);border-color:rgba(88,204,2,.25)}
+.bd-pl{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;margin-bottom:2px}
+.bd-p.prefix .bd-pl{color:var(--pur2)}.bd-p.root .bd-pl{color:var(--blu2)}.bd-p.suffix .bd-pl{color:var(--grn2)}
+.bd-pt{font-size:17px;font-weight:900}.bd-pm{font-size:9px;color:var(--tx2);font-weight:600}
+.bd-ar{font-size:15px;color:var(--tx3);font-weight:900;display:flex;align-items:center}
+.bd-ex{text-align:center;font-size:13px;color:var(--tx2);line-height:1.8;margin-bottom:16px;padding:12px;background:var(--bg);border-radius:11px}
+.bd-rl{border-top:2px solid var(--bg3);padding-top:12px}.bd-rl h4{font-size:10px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.bd-rl-l{display:flex;flex-wrap:wrap;gap:5px}
+.bd-rw{background:var(--bg);padding:4px 11px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.bd-rw:hover{border-color:var(--blu);color:var(--blu)}
+
+/* === QUIZ === */
+.qc{max-width:560px;margin:0 auto}
+.qcd{background:var(--bg2);border:3px solid var(--bg3);border-radius:var(--r2);padding:28px;box-shadow:var(--sh);text-align:center}
+.qpr{display:flex;gap:4px;justify-content:center;margin-bottom:22px}
+.qd{width:26px;height:5px;border-radius:3px;background:var(--bg3);transition:all .3s}.qd.dn{background:var(--grn)}.qd.cu{background:var(--blu);width:38px}.qd.wr{background:var(--red)}
+.qpl{width:68px;height:68px;border-radius:50%;background:var(--blu);border:none;border-bottom:5px solid var(--blu2);color:#fff;font-size:26px;cursor:pointer;margin:0 auto 14px;display:flex;align-items:center;justify-content:center}.qpl:active{border-bottom-width:0;transform:translateY(5px)}
+.qpm{font-size:13px;color:var(--tx2);margin-bottom:18px;font-weight:600}
+.qtt{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+.qtb{padding:6px 16px;border-radius:16px;border:2px solid var(--bg3);background:var(--bg2);font-family:inherit;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer}.qtb:hover,.qtb.on{border-color:var(--blu);color:var(--blu);background:var(--blu3)}
+.qos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qo{background:var(--bg2);border:3px solid var(--bg3);border-bottom:5px solid var(--bg4);border-radius:12px;padding:13px;font-family:inherit;font-size:12px;color:var(--tx);cursor:pointer;transition:all .1s;text-align:left;font-weight:600}
+.qo:hover{border-color:var(--blu)}.qo:active{border-bottom-width:3px;transform:translateY(2px)}
+.qo.ok{border-color:var(--grn);background:var(--grn3);color:var(--grn2);border-bottom-color:var(--grn2)}
+.qo.ng{border-color:var(--red);background:var(--red3);color:var(--red2);border-bottom-color:var(--red2)}
+.qo .qw{font-weight:800;font-size:14px;margin-bottom:1px}.qo .qh{font-size:9px;color:var(--tx3);font-weight:500}
+.qdi{width:100%;background:var(--bg);border:3px solid var(--bg3);border-radius:12px;padding:13px;font-family:inherit;font-size:18px;font-weight:700;color:var(--tx);outline:none;text-align:center;letter-spacing:2px}.qdi:focus{border-color:var(--blu)}.qdi.ok{border-color:var(--grn);background:var(--grn3)}.qdi.ng{border-color:var(--red);background:var(--red3)}
+
+/* Result */
+.rc{text-align:center;padding:24px}
+.rs{font-size:52px;font-weight:900;margin-bottom:2px}.rs.g{color:var(--grn)}.rs.m{color:var(--org)}.rs.b{color:var(--red)}
+.rm{font-size:15px;font-weight:700;margin-bottom:2px}.rsb{color:var(--tx2);margin-bottom:14px;font-size:12px}
+.rxp{display:inline-flex;align-items:center;gap:4px;background:var(--org3);color:var(--org);font-weight:800;padding:4px 12px;border-radius:14px;font-size:12px;margin-bottom:14px}
+
+/* === GAMES === */
+.gg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.gc{background:var(--bg2);border:3px solid var(--bg3);border-bottom:5px solid var(--bg4);border-radius:var(--r1);padding:18px;text-align:center;cursor:pointer;transition:all .15s}
+.gc:hover{transform:translateY(-3px);border-color:var(--blu);box-shadow:var(--sh2)}.gc:active{transform:translateY(1px);border-bottom-width:3px}
+.gc .gi{font-size:32px;margin-bottom:8px}.gc .gt{font-size:14px;font-weight:800;margin-bottom:2px}.gc .gd{font-size:10px;color:var(--tx2)}
+.ga{background:var(--bg2);border:2px solid var(--bg3);border-radius:var(--r2);padding:22px;box-shadow:var(--sh)}
+.gbk{background:none;border:none;color:var(--tx2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;gap:4px}.gbk:hover{color:var(--tx)}
+
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:500px;margin:0 auto}
+.mc{aspect-ratio:1.1;background:var(--bg);border:3px solid var(--bg3);border-bottom:4px solid var(--bg4);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;padding:5px;text-align:center;user-select:none;line-height:1.25}
+.mc:hover{border-color:var(--tx3)}.mc.sl{border-color:var(--blu);background:var(--blu3);border-bottom-color:var(--blu2)}
+.mc.mt{border-color:var(--grn);background:var(--grn3);opacity:.5;pointer-events:none}
+.mc.en{font-size:13px}.mc.zh{font-size:10px;color:var(--tx2)}
+
+.pzc{text-align:center;font-size:14px;color:var(--tx2);font-weight:600;margin-bottom:5px}
+.pzph{text-align:center;font-family:'Fira Code',monospace;color:var(--blu);font-size:12px;margin-bottom:4px}
+.pzsp{display:flex;margin:0 auto 14px;width:42px;height:42px;border-radius:50%;background:var(--blu3);border:3px solid var(--blu);color:var(--blu);font-size:15px;cursor:pointer;align-items:center;justify-content:center}
+.pzsl{display:flex;gap:4px;justify-content:center;margin-bottom:22px;min-height:44px;flex-wrap:wrap}
+.pzs{width:36px;height:42px;border:3px dashed var(--bg4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;transition:all .15s}
+.pzs.fi{border-style:solid;border-color:var(--blu);background:var(--blu3)}.pzs.ok{border-color:var(--grn);background:var(--grn3)}
+.pzls{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.pzl{width:38px;height:42px;background:var(--bg2);border:3px solid var(--bg3);border-bottom:4px solid var(--bg4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;cursor:pointer;transition:all .1s;user-select:none}
+.pzl:hover{border-color:var(--blu);transform:translateY(-2px)}.pzl:active{border-bottom-width:2px;transform:translateY(2px)}.pzl.us{opacity:.2;pointer-events:none}
+
+.tmh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.tmck{font-family:'Fira Code',monospace;font-size:26px;font-weight:700;color:var(--blu)}
+.tmck.dng{color:var(--red);animation:tp .5s infinite alternate}
+@keyframes tp{to{opacity:.4;transform:scale(1.05)}}
+.tmsd{font-size:14px;color:var(--tx2);font-weight:700}.tmsd span{color:var(--gld);font-weight:900;font-size:18px}
+.tmw{text-align:center;font-size:26px;font-weight:900;margin-bottom:14px}
+.tmos{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.tmo{background:var(--bg2);border:3px solid var(--bg3);border-bottom:4px solid var(--bg4);border-radius:11px;padding:11px;font-family:inherit;font-size:12px;color:var(--tx);cursor:pointer;text-align:center;font-weight:600;transition:all .08s}
+.tmo:hover{border-color:var(--blu)}.tmo:active{border-bottom-width:2px;transform:translateY(2px)}
+.tmo.ok{border-color:var(--grn);background:var(--grn3)}.tmo.ng{border-color:var(--red);background:var(--red3)}
+.tmcm{text-align:center;font-size:10px;font-weight:800;color:var(--org);margin-top:5px;min-height:14px}
+
+/* === WRONG BOOK === */
+.wbe{text-align:center;padding:32px;color:var(--tx3)}.wbe .wei{font-size:40px;margin-bottom:8px}
+.wbl{display:flex;flex-direction:column;gap:7px}
+.wbi{display:flex;align-items:center;gap:12px;background:var(--bg2);border:2px solid var(--bg3);border-radius:11px;padding:12px 16px}
+.wbi:hover{border-color:var(--blu)}
+.wbw{font-size:15px;font-weight:800;min-width:100px}.wbm{flex:1;font-size:11px;color:var(--tx2)}.wbc{font-size:10px;font-weight:800;color:var(--red);background:var(--red3);padding:2px 7px;border-radius:7px}
+.wbd{background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3)}.wbd:hover{color:var(--red)}
+
+/* Error Analysis Panel */
+.ea-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.ea-card{background:var(--bg2);border:2px solid var(--bg3);border-radius:var(--r1);padding:16px;text-align:center}
+.ea-card .ev{font-size:24px;font-weight:900;margin-bottom:2px}
+.ea-card .el{font-size:10px;color:var(--tx2);font-weight:600}
+.ea-bar{height:16px;background:var(--bg3);border-radius:8px;overflow:hidden;margin-bottom:4px}
+.ea-bar-f{height:100%;border-radius:8px;transition:width .5s}
+
+/* === ACHIEVEMENTS === */
+.as{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
+.asi{background:var(--bg2);border:2px solid var(--bg3);border-radius:var(--r1);padding:16px;text-align:center}
+.asi .ai{font-size:22px;margin-bottom:4px}.asi .av{font-size:22px;font-weight:900}.asi .al{font-size:10px;color:var(--tx2);font-weight:600}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;max-width:340px;margin:0 auto}
+.ch{font-size:9px;font-weight:800;color:var(--tx3);text-align:center;padding:4px}
+.cd{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--tx3)}
+.cd.ac{background:var(--grn3);color:var(--grn2)}.cd.td{border:2px solid var(--blu);color:var(--blu)}
+.abs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-top:18px}
+.ab{background:var(--bg2);border:2px solid var(--bg3);border-radius:11px;padding:12px;text-align:center}
+.ab.ul{border-color:var(--gld);background:linear-gradient(135deg,#fffdf2,#fff8dd)}.ab:not(.ul){opacity:.3;filter:grayscale(1)}
+.ab .abi{font-size:26px;margin-bottom:3px}.ab .abn{font-size:10px;font-weight:800}.ab .abd{font-size:8px;color:var(--tx3);margin-top:1px}
+
+/* Skill Tree */
+.skill-tree{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:22px;padding:16px;background:var(--bg2);border:2px solid var(--bg3);border-radius:var(--r2)}
+.sk-node{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid;transition:all .2s;cursor:default}
+.sk-node.done{border-color:var(--grn);background:var(--grn3)}.sk-node.cur{border-color:var(--blu);background:var(--blu3);animation:skPulse 1.5s infinite}
+.sk-node.lock{border-color:var(--bg4);background:var(--bg3);opacity:.4;filter:grayscale(1)}
+@keyframes skPulse{0%,100%{box-shadow:0 0 0 0 rgba(28,176,246,.3)}50%{box-shadow:0 0 0 8px rgba(28,176,246,0)}}
+.sk-line{width:3px;height:16px;background:var(--bg4);border-radius:2px}.sk-line.done{background:var(--grn)}
+.sk-label{font-size:10px;font-weight:700;color:var(--tx2);margin-top:-4px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .side{transform:translateX(-100%)}.side.op{transform:translateX(0);box-shadow:var(--sh2)}
+  .mn{margin-left:0}.cnt{padding:12px}.top{padding:8px 14px}.cf{padding:8px 14px 0}
+  .gg{grid-template-columns:1fr 1fr}.mg{grid-template-columns:repeat(3,1fr)}
+  .qos,.tmos{grid-template-columns:1fr}.as{grid-template-columns:repeat(2,1fr)}.ea-grid{grid-template-columns:1fr 1fr 1fr}
+  .ham{display:block}
+}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:99}.ov.sh{display:block}
+</style>
+</head>
+<body>
+<div class="ov" id="ov" onclick="tgS()"></div>
+<div class="app">
+<aside class="side" id="sb">
+  <div class="s-logo"><div class="s-logo-i">V</div><div class="s-logo-t">Vocab<span>Star</span></div></div>
+  <div class="s-nav">
+    <div class="s-cat">学习</div>
+    <div class="s-it on" onclick="go('fc',this)"><span class="ic">📇</span>单词闪卡</div>
+    <div class="s-it" onclick="go('sm',this)"><span class="ic">🌌</span>词根星空图</div>
+    <div class="s-it" onclick="go('bd',this)"><span class="ic">🔬</span>词根拆解</div>
+    <div class="s-dv"></div>
+    <div class="s-cat">练习</div>
+    <div class="s-it" onclick="go('qz',this)"><span class="ic">🎧</span>听写 & 选择</div>
+    <div class="s-it" onclick="go('gm',this)"><span class="ic">🎮</span>趣味练习</div>
+    <div class="s-dv"></div>
+    <div class="s-cat">记录</div>
+    <div class="s-it" onclick="go('wb',this)"><span class="ic">📕</span>错题本<span class="bdg" id="wbB" style="display:none">0</span></div>
+    <div class="s-it" onclick="go('ac',this)"><span class="ic">🏆</span>成就系统</div>
+  </div>
+</aside>
+<div class="mn">
+  <div class="top">
+    <div class="top-l"><button class="ham" onclick="tgS()">☰</button><span class="top-t" id="ttl">📇 单词闪卡</span></div>
+    <div class="top-r">
+      <div class="ts sk">🔥<span id="skV">0</span></div>
+      <div class="ts xp">⚡<span id="xpV">0</span><div class="xpb"><div class="xpf" id="xpF" style="width:0%"></div></div></div>
+      <div class="ts lv">⭐Lv.<span id="lvV">1</span></div>
+    </div>
+  </div>
+  <div class="daily-bar">
+    <div class="daily-inner">
+      <div class="daily-label">今日目标</div>
+      <div class="daily-track"><div class="daily-fill" id="dailyF" style="width:0%"></div></div>
+      <div class="daily-goal" id="dailyG">0/50 XP</div>
+      <div class="daily-streak" id="dailyS">🔥 0天连续</div>
+    </div>
+  </div>
+  <div class="cf" id="cflt">
+    <button class="cfb on" onclick="setC('all',this)">全部<span class="n" id="nA"></span></button>
+    <button class="cfb" onclick="setC('ww',this)">Wordly Wise<span class="n" id="nW"></span></button>
+    <button class="cfb" onclick="setC('vw',this)">Vocab Workshop<span class="n" id="nV"></span></button>
+    <button class="cfb" onclick="setC('il',this)">ISEE Lower<span class="n" id="nI"></span></button>
+    <button class="cfb" onclick="setC('iu',this)">ISEE Upper<span class="n" id="nU"></span></button>
+  </div>
+  <div class="cnt">
+    <div class="sec on" id="s-fc"><div class="sh"><h2>📇 单词闪卡</h2><p>点击翻转 · 掌握标记 · Quizlet式高效记忆</p></div><div class="fca"><div class="fcw"><div class="fc" id="fc" onclick="flip()"><div class="ff ff-f" id="fF"><div class="f-bg" id="fBg"></div><div class="ff-in"><div class="f-em" id="fE"></div><div class="f-w" id="fW"></div><div class="f-ph" id="fP"></div><div class="f-ps" id="fPs"></div></div><div class="f-tap">点击翻转 →</div></div><div class="ff ff-b"><div class="fb-in"><div class="fb-w" id="fbW"></div><div class="fb-ph" id="fbP"></div><div class="fb-rs" id="fbR"></div><div class="fb-m" id="fbM"></div><div class="fb-ex" id="fbE"></div></div></div></div></div><div class="fcc"><button class="fcb no" onclick="fNo()">✗</button><button class="fcb" onclick="fPv()">◀</button><button class="fcb sp" onclick="say(gW().w)">🔊</button><span class="fcn" id="fCt"></span><button class="fcb" onclick="fNx()">▶</button><button class="fcb ok" onclick="fOk()">✓</button></div></div></div>
+    <div class="sec" id="s-sm"><div class="sh"><h2>🌌 词根星空图</h2><p>Membean式星座可视化 · 点击探索词汇宇宙</p></div><div class="smc"><canvas id="smC"></canvas><div class="sm-lg"><div><span style="background:#ce82ff"></span>前缀</div><div><span style="background:#1cb0f6"></span>词根</div><div><span style="background:#58cc02"></span>后缀</div><div><span style="background:#ffc800"></span>已掌握</div></div><div class="sm-i" id="smI"><h3 id="smT"></h3><div class="tp" id="smTp"></div><div class="mn2" id="smM"></div><div class="sw" id="smW"></div></div></div></div>
+    <div class="sec" id="s-bd"><div class="sh"><h2>🔬 词根拆解</h2><p>拆分结构 · 动画演示 · 举一反三</p></div><div class="bdc"><div class="bds"><input id="bdi" placeholder="输入单词，如 resilient…" onkeydown="if(event.key==='Enter')bdG()"><button onclick="bdG()">拆 解</button></div><div class="bdr" id="bdR"></div></div></div>
+    <div class="sec" id="s-qz"><div class="sh"><h2>🎧 听写 & 选择题</h2><p>切换模式 · 练习闭环 · 巩固记忆</p></div><div class="qc"><div class="qtt"><button class="qtb on" onclick="sqm('c',this)">📝 选择题</button><button class="qtb" onclick="sqm('d',this)">🎧 听写</button></div><div class="qcd" id="qC"></div></div></div>
+    <div class="sec" id="s-gm"><div class="sh"><h2>🎮 趣味练习</h2><p>Quizlet式游戏学习 · 让背单词不枯燥</p></div><div id="gM"><div class="gg"><div class="gc" onclick="sG('ma')"><div class="gi">🔗</div><div class="gt">连连看</div><div class="gd">配对英文与中文释义</div></div><div class="gc" onclick="sG('pz')"><div class="gi">🧩</div><div class="gt">拼字游戏</div><div class="gd">根据提示拼出单词</div></div><div class="gc" onclick="sG('tm')"><div class="gi">⚡</div><div class="gt">限时挑战</div><div class="gd">60秒看谁答得多</div></div></div></div><div id="gP" style="display:none"><div class="ga" id="gA"></div></div></div>
+    <div class="sec" id="s-wb"><div class="sh"><h2>📕 错题本 & 数据分析</h2><p>XP体系错题追踪 · 数据驱动复习</p></div><div id="wbC"></div></div>
+    <div class="sec" id="s-ac"><div class="sh"><h2>🏆 成就系统 & 技能树</h2><p>多邻国式打卡 · XP成长体系</p></div><div id="aC"></div></div>
+  </div>
+</div>
+</div>
+<script>
+// ====== WORD DATABASE ======
+const D=[
+{w:"abundant",ph:"/əˈbʌndənt/",ps:"adj.",em:"🌊",c:"ww",m:"<strong>丰富的，充裕的</strong>",ms:"丰富的",ex:"The region has <em>abundant</em> natural resources.",rt:[{t:"prefix",x:"ab-",m:"加强"},{t:"root",x:"und",m:"波浪"},{t:"suffix",x:"-ant",m:"形容词"}],ep:"波浪涌来→溢出→丰富",rl:["redundant","inundate","undulate"]},
+{w:"barren",ph:"/ˈbærən/",ps:"adj.",em:"🏜️",c:"ww",m:"<strong>贫瘠的，荒芜的</strong>",ms:"贫瘠的",ex:"The <em>barren</em> landscape stretched for miles.",rt:[{t:"root",x:"barr",m:"空"},{t:"suffix",x:"-en",m:"形容词"}],ep:"空的→贫瘠荒芜",rl:["barrier","barricade"]},
+{w:"cautious",ph:"/ˈkɔːʃəs/",ps:"adj.",em:"⚠️",c:"ww",m:"<strong>谨慎的，小心的</strong>",ms:"谨慎的",ex:"Be <em>cautious</em> when crossing the street.",rt:[{t:"root",x:"caut",m:"小心"},{t:"suffix",x:"-ious",m:"形容词"}],ep:"保持小心→谨慎",rl:["caution","precaution"]},
+{w:"demonstrate",ph:"/ˈdemənstreɪt/",ps:"v.",em:"📊",c:"ww",m:"<strong>演示，证明</strong>",ms:"演示",ex:"The teacher <em>demonstrated</em> the experiment.",rt:[{t:"prefix",x:"de-",m:"完全"},{t:"root",x:"monstr",m:"展示"},{t:"suffix",x:"-ate",m:"动词"}],ep:"完全展示→演示证明",rl:["monster","remonstrate"]},
+{w:"elaborate",ph:"/ɪˈlæbərət/",ps:"adj./v.",em:"🎨",c:"ww",m:"<strong>精心制作的；详细阐述</strong>",ms:"精心的",ex:"Could you <em>elaborate</em> on your idea?",rt:[{t:"prefix",x:"e-",m:"出"},{t:"root",x:"labor",m:"劳动"},{t:"suffix",x:"-ate",m:"动词"}],ep:"劳动产出→精心制作",rl:["labor","collaborate","laboratory"]},
+{w:"fragile",ph:"/ˈfrædʒəl/",ps:"adj.",em:"🔮",c:"ww",m:"<strong>易碎的，脆弱的</strong>",ms:"易碎的",ex:"Handle the <em>fragile</em> glass with care.",rt:[{t:"root",x:"frag",m:"碎"},{t:"suffix",x:"-ile",m:"形容词"}],ep:"容易碎→脆弱",rl:["fragment","fraction","fracture"]},
+{w:"genuine",ph:"/ˈdʒenjuɪn/",ps:"adj.",em:"💎",c:"ww",m:"<strong>真正的，真诚的</strong>",ms:"真正的",ex:"Her smile was warm and <em>genuine</em>.",rt:[{t:"root",x:"genu",m:"出生"},{t:"suffix",x:"-ine",m:"形容词"}],ep:"与生俱来→真正的",rl:["gene","generate","genius"]},
+{w:"hostile",ph:"/ˈhɑːstəl/",ps:"adj.",em:"😤",c:"ww",m:"<strong>敌意的，不友好的</strong>",ms:"敌意的",ex:"The crowd turned <em>hostile</em>.",rt:[{t:"root",x:"host",m:"敌人"},{t:"suffix",x:"-ile",m:"形容词"}],ep:"像敌人→充满敌意",rl:["hostility"]},
+{w:"benevolent",ph:"/bəˈnevələnt/",ps:"adj.",em:"💖",c:"vw",m:"<strong>仁慈的，善意的</strong>",ms:"仁慈的",ex:"The <em>benevolent</em> donor funded scholarships.",rt:[{t:"prefix",x:"bene-",m:"好"},{t:"root",x:"vol",m:"意愿"},{t:"suffix",x:"-ent",m:"形容词"}],ep:"好的意愿→仁慈",rl:["malevolent","volunteer","benign"]},
+{w:"circumscribe",ph:"/ˈsɜːrkəmskraɪb/",ps:"v.",em:"⭕",c:"vw",m:"<strong>限制，约束</strong>",ms:"限制",ex:"The law <em>circumscribes</em> powers.",rt:[{t:"prefix",x:"circum-",m:"围绕"},{t:"root",x:"scrib",m:"写"},{t:"suffix",x:"-e",m:"动词"}],ep:"围绕画线→限制",rl:["describe","inscribe","prescribe"]},
+{w:"gregarious",ph:"/ɡrɪˈɡeriəs/",ps:"adj.",em:"🎉",c:"vw",m:"<strong>合群的，爱社交的</strong>",ms:"合群的",ex:"She's <em>gregarious</em> and loves parties.",rt:[{t:"root",x:"greg",m:"群"},{t:"suffix",x:"-arious",m:"形容词"}],ep:"属于群体→爱社交",rl:["congregate","aggregate","segregate"]},
+{w:"hypothetical",ph:"/ˌhaɪpəˈθetɪkl/",ps:"adj.",em:"🤔",c:"vw",m:"<strong>假设的，假定的</strong>",ms:"假设的",ex:"Consider a <em>hypothetical</em> scenario.",rt:[{t:"prefix",x:"hypo-",m:"下"},{t:"root",x:"thet",m:"放置"},{t:"suffix",x:"-ical",m:"形容词"}],ep:"放在下面作基础→假设",rl:["hypothesis","synthetic"]},
+{w:"inevitable",ph:"/ɪnˈevɪtəbl/",ps:"adj.",em:"⏳",c:"vw",m:"<strong>不可避免的</strong>",ms:"不可避免的",ex:"Change is <em>inevitable</em>.",rt:[{t:"prefix",x:"in-",m:"不"},{t:"root",x:"evit",m:"避免"},{t:"suffix",x:"-able",m:"能…的"}],ep:"不能避免→必然",rl:["inevitably"]},
+{w:"magnanimous",ph:"/mæɡˈnænɪməs/",ps:"adj.",em:"👑",c:"vw",m:"<strong>宽宏大量的</strong>",ms:"宽宏大量的",ex:"The <em>magnanimous</em> leader forgave opponents.",rt:[{t:"root",x:"magn",m:"大"},{t:"root",x:"anim",m:"心灵"},{t:"suffix",x:"-ous",m:"形容词"}],ep:"大心灵→宽宏大量",rl:["magnify","magnificent","animate"]},
+{w:"nonchalant",ph:"/ˌnɑːnʃəˈlɑːnt/",ps:"adj.",em:"😎",c:"vw",m:"<strong>漫不经心的</strong>",ms:"漫不经心的",ex:"He appeared <em>nonchalant</em>.",rt:[{t:"prefix",x:"non-",m:"不"},{t:"root",x:"chal",m:"关心"},{t:"suffix",x:"-ant",m:"形容词"}],ep:"不关心→漫不经心",rl:["nonchalance"]},
+{w:"desolate",ph:"/ˈdesələt/",ps:"adj.",em:"🌾",c:"vw",m:"<strong>荒凉的</strong>",ms:"荒凉的",ex:"The <em>desolate</em> ruins told a sad story.",rt:[{t:"prefix",x:"de-",m:"完全"},{t:"root",x:"sol",m:"孤独"},{t:"suffix",x:"-ate",m:"形容词"}],ep:"完全孤独→荒凉",rl:["sole","solitary","solitude"]},
+{w:"abolish",ph:"/əˈbɑːlɪʃ/",ps:"v.",em:"🚫",c:"il",m:"<strong>废除，取消</strong>",ms:"废除",ex:"The country <em>abolished</em> slavery.",rt:[{t:"prefix",x:"ab-",m:"离开"},{t:"root",x:"ol",m:"生长"},{t:"suffix",x:"-ish",m:"动词"}],ep:"使不再生长→废除",rl:["abolition"]},
+{w:"conceal",ph:"/kənˈsiːl/",ps:"v.",em:"🙈",c:"il",m:"<strong>隐藏，隐瞒</strong>",ms:"隐藏",ex:"She tried to <em>conceal</em> her surprise.",rt:[{t:"prefix",x:"con-",m:"完全"},{t:"root",x:"ceal",m:"藏"}],ep:"完全藏起来→隐瞒",rl:["reveal"]},
+{w:"durable",ph:"/ˈdʊrəbl/",ps:"adj.",em:"🛡️",c:"il",m:"<strong>耐用的，持久的</strong>",ms:"耐用的",ex:"This fabric is very <em>durable</em>.",rt:[{t:"root",x:"dur",m:"持续"},{t:"suffix",x:"-able",m:"能…的"}],ep:"能持续→耐用",rl:["endure","duration"]},
+{w:"essential",ph:"/ɪˈsenʃl/",ps:"adj.",em:"⭐",c:"il",m:"<strong>必要的，基本的</strong>",ms:"必要的",ex:"Water is <em>essential</em> for life.",rt:[{t:"root",x:"essent",m:"本质"},{t:"suffix",x:"-ial",m:"形容词"}],ep:"属于本质→必不可少",rl:["essence","quintessential"]},
+{w:"famished",ph:"/ˈfæmɪʃt/",ps:"adj.",em:"😫",c:"il",m:"<strong>极饿的</strong>",ms:"极饿的",ex:"I was <em>famished</em> after the hike.",rt:[{t:"root",x:"fam",m:"饥饿"},{t:"suffix",x:"-ish",m:"动词"}],ep:"饥饿状态→极饿",rl:["famine"]},
+{w:"imitate",ph:"/ˈɪmɪteɪt/",ps:"v.",em:"🪞",c:"il",m:"<strong>模仿，仿效</strong>",ms:"模仿",ex:"Children often <em>imitate</em> their parents.",rt:[{t:"root",x:"imit",m:"模仿"},{t:"suffix",x:"-ate",m:"动词"}],ep:"做出模仿→仿效",rl:["imitation","image"]},
+{w:"legible",ph:"/ˈledʒəbl/",ps:"adj.",em:"📖",c:"il",m:"<strong>清晰可读的</strong>",ms:"可读的",ex:"Write in <em>legible</em> handwriting.",rt:[{t:"root",x:"leg",m:"读"},{t:"suffix",x:"-ible",m:"能…的"}],ep:"能被读→清晰可读",rl:["legend","lecture","eligible"]},
+{w:"keen",ph:"/kiːn/",ps:"adj.",em:"🔎",c:"il",m:"<strong>敏锐的，热切的</strong>",ms:"敏锐的",ex:"She has a <em>keen</em> sense of observation.",rt:[{t:"root",x:"keen",m:"敏锐"}],ep:"感觉锐利→敏锐",rl:["keenly"]},
+{w:"advocate",ph:"/ˈædvəkeɪt/",ps:"v./n.",em:"📢",c:"iu",m:"<strong>提倡；支持者</strong>",ms:"提倡",ex:"She <em>advocates</em> for children's rights.",rt:[{t:"prefix",x:"ad-",m:"向"},{t:"root",x:"voc",m:"声音"},{t:"suffix",x:"-ate",m:"动词"}],ep:"向…发声→提倡",rl:["vocal","vocabulary","invoke"]},
+{w:"brevity",ph:"/ˈbrevəti/",ps:"n.",em:"📏",c:"iu",m:"<strong>简洁，简短</strong>",ms:"简洁",ex:"<em>Brevity</em> is the soul of wit.",rt:[{t:"root",x:"brev",m:"短"},{t:"suffix",x:"-ity",m:"名词"}],ep:"短→简洁",rl:["brief","abbreviate"]},
+{w:"candid",ph:"/ˈkændɪd/",ps:"adj.",em:"💬",c:"iu",m:"<strong>坦率的，直言的</strong>",ms:"坦率的",ex:"I appreciate your <em>candid</em> feedback.",rt:[{t:"root",x:"cand",m:"白/光"},{t:"suffix",x:"-id",m:"形容词"}],ep:"像白光透明→坦率",rl:["candle","candidate","candor"]},
+{w:"diligent",ph:"/ˈdɪlɪdʒənt/",ps:"adj.",em:"📚",c:"iu",m:"<strong>勤勉的，刻苦的</strong>",ms:"勤勉的",ex:"She is a <em>diligent</em> student.",rt:[{t:"prefix",x:"di-",m:"分开"},{t:"root",x:"lig",m:"选择"},{t:"suffix",x:"-ent",m:"形容词"}],ep:"精心选择每步→勤勉",rl:["diligence","negligent"]},
+{w:"eloquent",ph:"/ˈeləkwənt/",ps:"adj.",em:"🎤",c:"iu",m:"<strong>雄辩的，口才好的</strong>",ms:"雄辩的",ex:"She gave an <em>eloquent</em> speech.",rt:[{t:"prefix",x:"e-",m:"出"},{t:"root",x:"loqu",m:"说"},{t:"suffix",x:"-ent",m:"形容词"}],ep:"说出(表达力强)→雄辩",rl:["loquacious","colloquial"]},
+{w:"fluctuate",ph:"/ˈflʌktʃueɪt/",ps:"v.",em:"📈",c:"iu",m:"<strong>波动，起伏</strong>",ms:"波动",ex:"Stock prices <em>fluctuate</em> daily.",rt:[{t:"root",x:"fluct",m:"流动"},{t:"suffix",x:"-uate",m:"动词"}],ep:"像水流动→波动",rl:["flux","influence","fluent"]},
+{w:"resilient",ph:"/rɪˈzɪliənt/",ps:"adj.",em:"🌱",c:"iu",m:"<strong>有韧性的</strong>",ms:"有韧性的",ex:"Children are often <em>resilient</em>.",rt:[{t:"prefix",x:"re-",m:"回"},{t:"root",x:"sil",m:"跳"},{t:"suffix",x:"-ient",m:"形容词"}],ep:"跳回来→有韧性",rl:["resilience","result"]},
+{w:"scrutinize",ph:"/ˈskruːtənaɪz/",ps:"v.",em:"🔍",c:"iu",m:"<strong>仔细检查，审视</strong>",ms:"仔细检查",ex:"The inspector <em>scrutinized</em> every detail.",rt:[{t:"root",x:"scrut",m:"检查"},{t:"suffix",x:"-ize",m:"使…化"}],ep:"进行仔细检查→审视",rl:["scrutiny","inscrutable"]},
+{w:"tenacious",ph:"/tɪˈneɪʃəs/",ps:"adj.",em:"💪",c:"iu",m:"<strong>坚韧的，顽强的</strong>",ms:"坚韧的",ex:"She is a <em>tenacious</em> negotiator.",rt:[{t:"root",x:"ten",m:"握住"},{t:"suffix",x:"-acious",m:"形容词"}],ep:"紧握不放→坚韧",rl:["tenant","tenure","retain"]},
+{w:"ubiquitous",ph:"/juːˈbɪkwɪtəs/",ps:"adj.",em:"🌍",c:"iu",m:"<strong>无处不在的</strong>",ms:"无处不在的",ex:"Smartphones are <em>ubiquitous</em>.",rt:[{t:"root",x:"ubique",m:"到处"},{t:"suffix",x:"-ous",m:"形容词"}],ep:"到处都有→无处不在",rl:["ubiquity"]},
+{w:"venerate",ph:"/ˈvenəreɪt/",ps:"v.",em:"🙏",c:"iu",m:"<strong>尊敬，崇敬</strong>",ms:"尊敬",ex:"Many cultures <em>venerate</em> ancestors.",rt:[{t:"root",x:"vener",m:"尊敬"},{t:"suffix",x:"-ate",m:"动词"}],ep:"给予尊敬→崇敬",rl:["venerable","reverence"]},
+{w:"philanthropy",ph:"/fɪˈlænθrəpi/",ps:"n.",em:"🤝",c:"iu",m:"<strong>慈善事业</strong>",ms:"慈善",ex:"His <em>philanthropy</em> in education is known.",rt:[{t:"root",x:"phil",m:"爱"},{t:"root",x:"anthrop",m:"人类"},{t:"suffix",x:"-y",m:"名词"}],ep:"爱人类→慈善",rl:["philosophy","anthropology"]}
+];
+
+const RT=[
+{r:"scrib/script",m:"写 write",t:"root",ws:["circumscribe","describe","inscribe"]},
+{r:"vol",m:"意愿 will",t:"root",ws:["benevolent","volunteer"]},
+{r:"greg",m:"群 flock",t:"root",ws:["gregarious","congregate","aggregate"]},
+{r:"magn",m:"大 great",t:"root",ws:["magnanimous","magnify","magnificent"]},
+{r:"phil",m:"爱 love",t:"root",ws:["philanthropy","philosophy"]},
+{r:"fluct",m:"流 flow",t:"root",ws:["fluctuate","flux","fluent"]},
+{r:"labor",m:"劳动 work",t:"root",ws:["elaborate","collaborate"]},
+{r:"dur",m:"持续 last",t:"root",ws:["durable","endure","duration"]},
+{r:"frag",m:"碎 break",t:"root",ws:["fragile","fragment","fracture"]},
+{r:"voc",m:"声 voice",t:"root",ws:["advocate","vocal","invoke"]},
+{r:"loqu",m:"说 speak",t:"root",ws:["eloquent","loquacious"]},
+{r:"ten",m:"握 hold",t:"root",ws:["tenacious","retain","tenant"]},
+{r:"leg",m:"读 read",t:"root",ws:["legible","lecture","legend"]},
+{r:"brev",m:"短 short",t:"root",ws:["brevity","brief","abbreviate"]},
+{r:"circum-",m:"围绕",t:"prefix",ws:["circumscribe","circumstance"]},
+{r:"bene-",m:"好 good",t:"prefix",ws:["benevolent","benefit","benign"]},
+{r:"re-",m:"回 back",t:"prefix",ws:["resilient","reveal","retain"]},
+{r:"in-",m:"不 not",t:"prefix",ws:["inevitable","inscrutable"]},
+{r:"ad-",m:"向 to",t:"prefix",ws:["advocate","adapt","adhere"]},
+{r:"-able",m:"能…的",t:"suffix",ws:["durable","legible","inevitable"]},
+{r:"-ous",m:"充满",t:"suffix",ws:["gregarious","ubiquitous","tenacious"]},
+{r:"-ate",m:"动词",t:"suffix",ws:["elaborate","fluctuate","venerate"]},
+{r:"-ent",m:"…的",t:"suffix",ws:["benevolent","resilient","eloquent","diligent"]}
+];
+
+// ====== STATE ======
+let S={c:'all',fi:0,kn:new Set(),wr:{},xp:0,lv:1,sk:0,qm:'c',qw:[],qi:0,qs:0,qa:false,ad:new Set(),ld:null,bg:{},ti:null,tdxp:0};
+try{const d=JSON.parse(localStorage.getItem('vs2'));if(d){Object.assign(S,d);S.kn=new Set(d.kn||[]);S.wr=d.wr||{};S.ad=new Set(d.ad||[]);S.bg=d.bg||{}}}catch(e){}
+function sv(){try{localStorage.setItem('vs2',JSON.stringify({...S,kn:[...S.kn],ad:[...S.ad]}))}catch(e){}}
+
+(function(){const td=new Date().toISOString().slice(0,10);
+  if(S.ld&&S.ld!==td){const diff=Math.floor((new Date(td)-new Date(S.ld))/864e5);if(diff>1)S.sk=0;S.tdxp=0}
+  if(!S.ld)S.ld=td})();
+
+function gF(){return S.c==='all'?D:D.filter(x=>x.c===S.c)}
+function gW(){const f=gF();return f[S.fi%f.length]}
+
+// ====== NAV ======
+const TT={fc:'📇 单词闪卡',sm:'🌌 词根星空图',bd:'🔬 词根拆解',qz:'🎧 听写 & 选择',gm:'🎮 趣味练习',wb:'📕 错题本',ac:'🏆 成就系统'};
+function go(s,el){
+  document.querySelectorAll('.sec').forEach(x=>x.classList.remove('on'));
+  document.getElementById('s-'+s).classList.add('on');
+  document.querySelectorAll('.s-it').forEach(x=>x.classList.remove('on'));if(el)el.classList.add('on');
+  document.getElementById('ttl').textContent=TT[s]||'';
+  document.getElementById('cflt').style.display=['fc','qz','gm'].includes(s)?'flex':'none';
+  if(s==='sm')setTimeout(initSM,80);if(s==='qz')initQ();if(s==='wb')rWB();if(s==='ac')rAC();
+  if(s==='gm'){document.getElementById('gM').style.display='';document.getElementById('gP').style.display='none'}
+  if(s==='bd')bdI();clS()
+}
+function tgS(){document.getElementById('sb').classList.toggle('op');document.getElementById('ov').classList.toggle('sh')}
+function clS(){document.getElementById('sb').classList.remove('op');document.getElementById('ov').classList.remove('sh')}
+function setC(c,el){S.c=c;S.fi=0;document.querySelectorAll('.cfb').forEach(x=>x.classList.remove('on'));el.classList.add('on');rFC();sv()}
+function addXP(n){const td=new Date().toISOString().slice(0,10);S.xp+=n;S.tdxp+=n;S.ad.add(td);if(S.ld!==td){S.sk++;S.ld=td}else{S.ld=td}S.lv=Math.floor(S.xp/100)+1;uTB();chB();sv()}
+function uTB(){
+  document.getElementById('xpV').textContent=S.xp;document.getElementById('skV').textContent=S.sk;document.getElementById('lvV').textContent=S.lv;
+  document.getElementById('xpF').style.width=(S.xp%100)+'%';
+  const wc=Object.keys(S.wr).length;const b=document.getElementById('wbB');if(wc>0){b.style.display='';b.textContent=wc}else b.style.display='none';
+  // Daily bar
+  const pct=Math.min(100,Math.round(S.tdxp/50*100));
+  document.getElementById('dailyF').style.width=pct+'%';
+  document.getElementById('dailyG').textContent=`${Math.min(S.tdxp,50)}/50 XP`;
+  document.getElementById('dailyS').innerHTML=`🔥 ${S.sk}天连续`;
+}
+function uCt(){document.getElementById('nA').textContent=`(${D.length})`;document.getElementById('nW').textContent=`(${D.filter(x=>x.c==='ww').length})`;document.getElementById('nV').textContent=`(${D.filter(x=>x.c==='vw').length})`;document.getElementById('nI').textContent=`(${D.filter(x=>x.c==='il').length})`;document.getElementById('nU').textContent=`(${D.filter(x=>x.c==='iu').length})`}
+
+// ====== FLASHCARD ======
+function rFC(){const f=gF();if(!f.length)return;const w=f[S.fi%f.length];
+  const cl={ww:'Wordly Wise',vw:'Vocab Workshop',il:'ISEE Lower',iu:'ISEE Upper'};
+  document.getElementById('fE').textContent=w.em;document.getElementById('fW').textContent=w.w;
+  document.getElementById('fP').textContent=w.ph;document.getElementById('fPs').textContent=w.ps;
+  const bg=document.getElementById('fBg');bg.textContent=cl[w.c];bg.className='f-bg '+w.c;
+  document.getElementById('fbW').textContent=w.w;document.getElementById('fbP').textContent=w.ph;
+  document.getElementById('fbR').innerHTML=(w.rt||[]).filter(r=>r.x).map(r=>`<span class="fb-r ${r.t}">${r.x} ${r.m}</span>`).join('');
+  document.getElementById('fbM').innerHTML=w.m;document.getElementById('fbE').innerHTML=w.ex;
+  document.getElementById('fCt').textContent=`${(S.fi%f.length)+1}/${f.length}`;
+  document.getElementById('fc').classList.remove('fl')}
+function flip(){document.getElementById('fc').classList.toggle('fl')}
+function fNx(){const f=gF();S.fi=(S.fi+1)%f.length;rFC();sv()}
+function fPv(){const f=gF();S.fi=(S.fi-1+f.length)%f.length;rFC();sv()}
+function fOk(){S.kn.add(gW().w);addXP(5);fNx()}
+function fNo(){const w=gW();S.wr[w.w]=(S.wr[w.w]||0)+1;uTB();fNx();sv()}
+function say(t){const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=0.85;speechSynthesis.speak(u)}
+
+// ====== STARMAP ======
+let smN=[];
+function initSM(){const c=document.getElementById('smC'),ctx=c.getContext('2d'),rect=c.parentElement.getBoundingClientRect();
+  c.width=rect.width;c.height=rect.height;const CW=c.width,CH=c.height;
+  smN=RT.map((r,i)=>{const a=(i/RT.length)*Math.PI*2-Math.PI/2,rd=Math.min(CW,CH)*0.3+Math.random()*50-25;
+    return{...r,x:CW/2+Math.cos(a)*rd+(Math.random()*30-15),y:CH/2+Math.sin(a)*rd+(Math.random()*30-15),sz:r.t==='root'?7:5,p:Math.random()*6.28}});
+  function cl(t){return t==='prefix'?'#ce82ff':t==='root'?'#1cb0f6':'#58cc02'}
+  let stars=[];for(let i=0;i<90;i++)stars.push({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1+.2,a:Math.random()});
+  let af;function dr(){ctx.clearRect(0,0,CW,CH);const t=Date.now()*.001;
+    stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.28);ctx.fillStyle=`rgba(180,200,255,${.1+Math.sin(t*2+s.a*10)*.07})`;ctx.fill()});
+    smN.forEach((n,i)=>{smN.forEach((m,j)=>{if(i>=j)return;const sh=n.ws.filter(w=>m.ws.includes(w));if(sh.length){ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(m.x,m.y);ctx.strokeStyle=`rgba(28,176,246,${.03+sh.length*.02})`;ctx.lineWidth=.4+sh.length*.2;ctx.stroke()}})});
+    smN.forEach(n=>{const nr=n.sz+Math.sin(t*1.5+n.p)*1.5,co=cl(n.t);
+      const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,nr*3);g.addColorStop(0,co+'30');g.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(n.x,n.y,nr*3,0,6.28);ctx.fillStyle=g;ctx.fill();
+      ctx.beginPath();ctx.arc(n.x,n.y,nr,0,6.28);ctx.fillStyle=co;ctx.fill();
+      ctx.fillStyle='rgba(230,232,250,.8)';ctx.font='600 10px Nunito';ctx.textAlign='center';ctx.fillText(n.r,n.x,n.y-nr-6)});
+    af=requestAnimationFrame(dr)}
+  if(af)cancelAnimationFrame(af);dr();
+  c.onclick=e=>{const cr=c.getBoundingClientRect(),mx=e.clientX-cr.left,my=e.clientY-cr.top;
+    let h=null;smN.forEach(n=>{if(Math.hypot(mx-n.x,my-n.y)<20)h=n});
+    const info=document.getElementById('smI');
+    if(h){document.getElementById('smT').textContent=h.r;document.getElementById('smTp').textContent=h.t==='prefix'?'前缀':h.t==='root'?'词根':'后缀';
+      document.getElementById('smM').textContent=h.m;document.getElementById('smW').innerHTML=h.ws.map(w=>`<span class="swt" onclick="smJ('${w}')">${w}</span>`).join('');info.classList.add('show')}
+    else info.classList.remove('show')}}
+function smJ(w){const i=D.findIndex(x=>x.w===w);if(i>=0){S.c='all';S.fi=i;document.querySelectorAll('.cfb').forEach(x=>x.classList.remove('on'));document.querySelector('.cfb').classList.add('on');rFC();go('fc',document.querySelector('.s-it'))}}
+
+// ====== BREAKDOWN ======
+function bdI(){bdR(D.find(x=>x.w==='resilient')||D[0])}
+function bdG(){const v=document.getElementById('bdi').value.trim().toLowerCase();if(!v)return;const f=D.find(x=>x.w===v);if(f)bdR(f);else document.getElementById('bdR').innerHTML=`<div class="bd-w">${v}</div><div style="text-align:center;color:var(--tx3);padding:14px">暂未收录，试试：</div><div class="bd-rl"><div class="bd-rl-l">${D.slice(0,10).map(x=>`<span class="bd-rw" onclick="document.getElementById('bdi').value='${x.w}';bdG()">${x.w}</span>`).join('')}</div></div>`}
+function bdR(w){document.getElementById('bdi').value=w.w;const ps=(w.rt||[]).filter(r=>r.x);
+  document.getElementById('bdR').innerHTML=`<div class="bd-w">${w.w}</div><div class="bd-ps">${ps.map((r,i)=>`<div class="bd-p ${r.t}" style="animation:fi .3s ease ${i*.12}s both"><div class="bd-pl">${r.t==='prefix'?'前缀':r.t==='root'?'词根':'后缀'}</div><div class="bd-pt">${r.x}</div><div class="bd-pm">${r.m}</div></div>${i<ps.length-1?'<div class="bd-ar">+</div>':''}`).join('')}</div><div class="bd-ex">💡 ${w.ep}<br>${w.m}</div><div class="bd-rl"><h4>同根词</h4><div class="bd-rl-l">${(w.rl||[]).map(r=>`<span class="bd-rw" onclick="document.getElementById('bdi').value='${r}';bdG()">${r}</span>`).join('')}</div></div>`}
+
+// ====== QUIZ ======
+function sqm(m,el){S.qm=m;document.querySelectorAll('.qtb').forEach(x=>x.classList.remove('on'));el.classList.add('on');initQ()}
+function initQ(){S.qw=shuf([...gF()]).slice(0,10);S.qi=0;S.qs=0;rQz()}
+function rQz(){if(S.qi>=S.qw.length){rQR();return}const w=S.qw[S.qi];
+  const dots=S.qw.map((_,i)=>`<div class="qd ${i<S.qi?'dn':i===S.qi?'cu':''}"></div>`).join('');
+  if(S.qm==='c'){const opts=qO(w);
+    document.getElementById('qC').innerHTML=`<div class="qpr">${dots}</div><button class="qpl" onclick="say('${w.w}')">🔊</button><div class="qpm">听发音，选出正确的单词</div><div class="qos">${opts.map(o=>`<button class="qo" onclick="qA(this,${o.w===w.w},'${w.w}')" data-c="${o.w===w.w}"><div class="qw">${o.w}</div><div class="qh">${o.ms}</div></button>`).join('')}</div>`;
+    S.qa=false;setTimeout(()=>say(w.w),250)}
+  else{document.getElementById('qC').innerHTML=`<div class="qpr">${dots}</div><button class="qpl" onclick="say('${w.w}')">🔊</button><div class="qpm">听发音，拼写出单词</div><div style="font-size:12px;color:var(--tx2);margin-bottom:12px">${w.ms} · ${w.ph}</div><input class="qdi" id="dI" placeholder="输入单词…" autocomplete="off" onkeydown="if(event.key==='Enter')dC()"><br><button class="btn btn-g" style="margin-top:12px" onclick="dC()">确认</button>`;
+    S.qa=false;setTimeout(()=>{say(w.w);document.getElementById('dI')&&document.getElementById('dI').focus()},250)}}
+function qO(w){let p=D.filter(x=>x.w!==w.w);return shuf([...shuf(p).slice(0,3),w])}
+function qA(el,ok,word){if(S.qa)return;S.qa=true;
+  document.querySelectorAll('.qo').forEach(b=>{if(b.dataset.c==='true')b.classList.add('ok');else if(b===el&&!ok)b.classList.add('ng')});
+  if(ok){S.qs++;addXP(10)}else{S.wr[word]=(S.wr[word]||0)+1;sv();uTB()}
+  setTimeout(()=>{S.qi++;rQz()},900)}
+function dC(){if(S.qa)return;S.qa=true;const inp=document.getElementById('dI');if(!inp)return;const v=inp.value.trim().toLowerCase(),w=S.qw[S.qi];
+  if(v===w.w){inp.classList.add('ok');S.qs++;addXP(15)}else{inp.classList.add('ng');inp.value=w.w;S.wr[w.w]=(S.wr[w.w]||0)+1;sv();uTB()}
+  setTimeout(()=>{S.qi++;rQz()},1100)}
+function rQR(){const pct=Math.round(S.qs/S.qw.length*100);const cls=pct>=80?'g':pct>=50?'m':'b';const msg=pct>=80?'🎉 太棒了！':pct>=50?'👍 继续加油！':'💪 多练几次！';
+  if(pct===100)S.bg.perfect=true;
+  document.getElementById('qC').innerHTML=`<div class="rc"><div class="rs ${cls}">${pct}%</div><div class="rm">${msg}</div><div class="rsb">答对 ${S.qs}/${S.qw.length}</div><div class="rxp">⚡ +${S.qs*(S.qm==='d'?15:10)} XP</div><br><button class="btn btn-g" onclick="initQ()">再来一轮</button></div>`;sv()}
+
+// ====== GAMES ======
+function sG(g){document.getElementById('gM').style.display='none';document.getElementById('gP').style.display='';
+  if(g==='ma')initMA();else if(g==='pz')initPZ();else initTM()}
+function bkG(){document.getElementById('gM').style.display='';document.getElementById('gP').style.display='none';clearInterval(S.ti)}
+
+// Match
+let mSel=null,mPr=0,mTt=0,mCd=[];
+function initMA(){const ws=shuf(gF()).slice(0,6);mTt=ws.length;mPr=0;mSel=null;
+  let cd=[];ws.forEach(w=>{cd.push({id:w.w+'e',tx:w.w,tp:'en',pr:w.w});cd.push({id:w.w+'z',tx:w.ms,tp:'zh',pr:w.w})});
+  cd=shuf(cd);mCd=cd;
+  document.getElementById('gA').innerHTML=`<button class="gbk" onclick="bkG()">← 返回</button><div style="text-align:center;margin-bottom:14px;font-weight:700;color:var(--tx2);font-size:13px">配对英文与中文 · <span id="mC">0/${mTt}</span></div><div class="mg">${cd.map((c,i)=>`<div class="mc ${c.tp}" data-i="${i}" onclick="mCl(this,${i})">${c.tx}</div>`).join('')}</div>`}
+function mCl(el,i){if(el.classList.contains('mt'))return;
+  if(mSel!==null&&mSel===i){el.classList.remove('sl');mSel=null;return}
+  if(mSel===null){el.classList.add('sl');mSel=i}
+  else{const pv=mCd[mSel],cu=mCd[i],pvE=document.querySelector(`.mc[data-i="${mSel}"]`);
+    if(pv.pr===cu.pr&&pv.tp!==cu.tp){el.classList.add('mt');pvE.classList.remove('sl');pvE.classList.add('mt');mPr++;document.getElementById('mC').textContent=`${mPr}/${mTt}`;addXP(8);
+      if(mPr===mTt)setTimeout(()=>{document.getElementById('gA').innerHTML=`<button class="gbk" onclick="bkG()">← 返回</button><div class="rc"><div class="rs g">🎉</div><div class="rm">全部配对成功！</div><div class="rxp">⚡ +${mTt*8} XP</div><br><button class="btn btn-g" onclick="initMA()">再来一轮</button></div>`},500)}
+    else{el.classList.add('sl');setTimeout(()=>{el.classList.remove('sl');pvE.classList.remove('sl')},400)}
+    mSel=null}}
+
+// Puzzle
+let pzW='',pzI=0,pzL=[];
+function initPZ(){const w=shuf(gF())[0];pzW=w.w;pzI=0;
+  const lt=w.w.split('');const ex='abcdefghijklmnopqrstuvwxyz';let pl=[...lt];while(pl.length<lt.length+3)pl.push(ex[Math.floor(Math.random()*26)]);pzL=shuf(pl);
+  document.getElementById('gA').innerHTML=`<button class="gbk" onclick="bkG()">← 返回</button><div class="pzc">${w.ms}</div><div class="pzph">${w.ph}</div><button class="pzsp" onclick="say('${w.w}')">🔊</button><div class="pzsl" id="pzS">${lt.map((_,i)=>`<div class="pzs" data-i="${i}"></div>`).join('')}</div><div class="pzls" id="pzL">${pzL.map((l,i)=>`<div class="pzl" data-i="${i}" onclick="pzP(this,${i})">${l}</div>`).join('')}</div>`;
+  setTimeout(()=>say(w.w),250)}
+function pzP(el,i){if(pzI>=pzW.length)return;const sl=document.querySelectorAll('.pzs')[pzI];
+  sl.textContent=pzL[i];sl.classList.add('fi');el.classList.add('us');pzI++;
+  if(pzI===pzW.length){const at=Array.from(document.querySelectorAll('.pzs')).map(s=>s.textContent).join('');
+    if(at===pzW){document.querySelectorAll('.pzs').forEach(s=>s.classList.add('ok'));addXP(20);
+      setTimeout(()=>{document.getElementById('gA').innerHTML+=`<div class="rc"><div class="rs g">✓</div><div class="rm">拼写正确！ ${pzW}</div><div class="rxp">⚡ +20 XP</div><br><button class="btn btn-g" onclick="initPZ()">下一个</button></div>`},400)}
+    else{S.wr[pzW]=(S.wr[pzW]||0)+1;sv();uTB();
+      setTimeout(()=>{document.querySelectorAll('.pzs').forEach(s=>{s.textContent='';s.classList.remove('fi')});document.querySelectorAll('.pzl').forEach(l=>l.classList.remove('us'));pzI=0},700)}}}
+
+// Timer
+function initTM(){S.tmT=60;S.tmS=0;S.tmQ=0;S.tmC=0;S.tmW=shuf([...gF()]);clearInterval(S.ti);rTQ();
+  S.ti=setInterval(()=>{S.tmT--;const ck=document.querySelector('.tmck');
+    if(ck){ck.textContent=S.tmT+'s';if(S.tmT<=10)ck.classList.add('dng');else ck.classList.remove('dng')}
+    if(S.tmT<=0){clearInterval(S.ti);rTR()}},1000)}
+function rTQ(){if(S.tmQ>=S.tmW.length)S.tmQ=0;const w=S.tmW[S.tmQ];const opts=qO(w);
+  document.getElementById('gA').innerHTML=`<button class="gbk" onclick="clearInterval(S.ti);bkG()">← 返回</button><div class="tmh"><div class="tmck">${S.tmT}s</div><div class="tmsd">得分 <span>${S.tmS}</span></div></div><div class="tmw">${w.w}</div><div class="tmos">${opts.map(o=>`<button class="tmo" onclick="tmA(this,${o.w===w.w},'${w.w}')">${o.ms}</button>`).join('')}</div><div class="tmcm">${S.tmC>=2?'🔥 连击 x'+S.tmC:''}</div>`}
+function tmA(el,ok,word){if(el.dataset.d)return;el.dataset.d='1';
+  if(ok){el.classList.add('ok');S.tmS+=10;S.tmC++;S.tmT+=2;addXP(5)}
+  else{el.classList.add('ng');S.tmC=0;S.wr[word]=(S.wr[word]||0)+1;sv();uTB()}
+  setTimeout(()=>{S.tmQ++;rTQ()},300)}
+function rTR(){document.getElementById('gA').innerHTML=`<button class="gbk" onclick="bkG()">← 返回</button><div class="rc"><div class="rs ${S.tmS>=80?'g':S.tmS>=40?'m':'b'}">${S.tmS}</div><div class="rm">${S.tmS>=80?'🏆 太强了！':S.tmS>=40?'⭐ 不错！':'💪 继续加油！'}</div><div class="rsb">60秒答对 ${Math.floor(S.tmS/10)} 题</div><div class="rxp">⚡ +${Math.floor(S.tmS/10)*5} XP</div><br><button class="btn btn-g" onclick="initTM()">再来一轮</button></div>`}
+
+// ====== WRONG BOOK + DATA ANALYSIS ======
+function rWB(){const ent=Object.entries(S.wr).sort((a,b)=>b[1]-a[1]);
+  if(!ent.length){document.getElementById('wbC').innerHTML=`<div class="wbe"><div class="wei">🎉</div><div style="font-size:16px;font-weight:800;margin-bottom:3px">暂无错题</div><div>继续做练习，错过的单词会自动记录</div></div>`;return}
+  // Data analysis panel
+  const total=ent.reduce((s,e)=>s+e[1],0);
+  const catCount={ww:0,vw:0,il:0,iu:0};ent.forEach(([w])=>{const fd=D.find(x=>x.w===w);if(fd)catCount[fd.c]++});
+  const maxCat=Math.max(...Object.values(catCount))||1;
+  let analysis=`<div class="ea-grid"><div class="ea-card"><div class="ev" style="color:var(--red)">${ent.length}</div><div class="el">错词总数</div></div><div class="ea-card"><div class="ev" style="color:var(--org)">${total}</div><div class="el">累计错误次数</div></div><div class="ea-card"><div class="ev" style="color:var(--blu)">${(total/ent.length).toFixed(1)}</div><div class="el">平均错误/词</div></div></div>`;
+  analysis+=`<div style="margin-bottom:18px"><div style="font-size:12px;font-weight:800;margin-bottom:8px">📊 各级别错误分布</div>`;
+  const catNames={ww:'Wordly Wise',vw:'Vocab Workshop',il:'ISEE Lower',iu:'ISEE Upper'};
+  const catColors={ww:'var(--grn)',vw:'var(--pur)',il:'var(--org)',iu:'var(--blu)'};
+  Object.entries(catCount).forEach(([k,v])=>{if(v>0)analysis+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="width:100px;font-size:10px;font-weight:700;color:var(--tx2)">${catNames[k]}</div><div class="ea-bar" style="flex:1"><div class="ea-bar-f" style="width:${v/maxCat*100}%;background:${catColors[k]}"></div></div><div style="font-size:11px;font-weight:800">${v}</div></div>`});
+  analysis+=`</div>`;
+  document.getElementById('wbC').innerHTML=analysis+`<div style="margin-bottom:12px;font-size:12px;font-weight:800">📕 错词列表</div><div class="wbl">${ent.map(([w,c])=>{const fd=D.find(x=>x.w===w);return`<div class="wbi"><div class="wbw">${w}</div><div class="wbm">${fd?fd.ms:''}</div><div class="wbc">错 ${c} 次</div><button class="wbd" onclick="delete S.wr['${w}'];sv();uTB();rWB()">✕</button></div>`}).join('')}</div><div style="margin-top:14px;text-align:center"><button class="btn btn-o" onclick="pWr()">🔄 练习全部错题</button></div>`}
+function pWr(){const ww=Object.keys(S.wr).map(w=>D.find(x=>x.w===w)).filter(Boolean);if(!ww.length)return;S.qw=shuf(ww).slice(0,10);S.qi=0;S.qs=0;S.qm='c';go('qz',document.querySelectorAll('.s-it')[3]);rQz()}
+
+// ====== ACHIEVEMENTS + SKILL TREE ======
+const BG=[
+{id:'first',n:'初出茅庐',d:'完成第一次练习',i:'🌟',ck:()=>S.xp>=10},
+{id:'s3',n:'三天连续',d:'连续学习3天',i:'🔥',ck:()=>S.sk>=3},
+{id:'s7',n:'一周坚持',d:'连续学习7天',i:'💎',ck:()=>S.sk>=7},
+{id:'s30',n:'月度达人',d:'连续学习30天',i:'👑',ck:()=>S.sk>=30},
+{id:'k10',n:'十词斩',d:'掌握10个单词',i:'📖',ck:()=>S.kn.size>=10},
+{id:'k20',n:'词汇达人',d:'掌握20个单词',i:'📚',ck:()=>S.kn.size>=20},
+{id:'x100',n:'百分学者',d:'累计100 XP',i:'⚡',ck:()=>S.xp>=100},
+{id:'x500',n:'学霸驾到',d:'累计500 XP',i:'🏆',ck:()=>S.xp>=500},
+{id:'l5',n:'五级勇士',d:'达到5级',i:'⭐',ck:()=>S.lv>=5},
+{id:'pf',n:'满分时刻',d:'测验100%',i:'💯',ck:()=>S.bg.perfect}
+];
+function chB(){BG.forEach(b=>{if(b.ck())S.bg[b.id]=true});sv()}
+
+// Skill tree levels
+const SKILLS=[
+{lv:1,n:'入门学徒',i:'🌱',need:0},{lv:2,n:'词汇新手',i:'📗',need:50},
+{lv:3,n:'拼写小将',i:'✏️',need:150},{lv:4,n:'词根探索者',i:'🔍',need:300},
+{lv:5,n:'闪卡达人',i:'📇',need:500},{lv:6,n:'语境大师',i:'📖',need:800},
+{lv:7,n:'词汇精英',i:'🎓',need:1200},{lv:8,n:'星空领航者',i:'🌌',need:2000}
+];
+
+function rAC(){const today=new Date(),yr=today.getFullYear(),mo=today.getMonth();
+  const dim=new Date(yr,mo+1,0).getDate(),fd=new Date(yr,mo,1).getDay();
+  const mns=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  const tds=today.toISOString().slice(0,10);
+  let cal=`<div style="text-align:center;font-weight:800;font-size:16px;margin-bottom:12px">${mns[mo]} ${yr}</div><div class="cg">`;
+  ['日','一','二','三','四','五','六'].forEach(d=>{cal+=`<div class="ch">${d}</div>`});
+  for(let i=0;i<fd;i++)cal+='<div class="cd"></div>';
+  for(let d=1;d<=dim;d++){const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cal+=`<div class="cd ${ds===tds?'td':''} ${S.ad.has(ds)?'ac':''}">${d}</div>`}
+  cal+='</div>';
+
+  // Skill tree
+  const curSkill=SKILLS.findIndex(s=>S.xp<s.need);const curIdx=curSkill===-1?SKILLS.length-1:Math.max(0,curSkill-1);
+  let tree=`<div style="font-size:14px;font-weight:800;margin-top:22px;margin-bottom:8px">🌳 技能树</div><div class="skill-tree">`;
+  SKILLS.forEach((sk,i)=>{const done=S.xp>=sk.need;const cur=i===curIdx&&!done||i===curIdx;
+    tree+=`<div class="sk-node ${done?'done':cur?'cur':'lock'}">${sk.i}</div><div style="font-size:10px;font-weight:700;color:${done?'var(--grn2)':cur?'var(--blu)':'var(--tx3)'};margin-bottom:2px">Lv.${sk.lv} ${sk.n}</div>`;
+    if(i<SKILLS.length-1)tree+=`<div class="sk-line ${done?'done':''}"></div>`});
+  tree+='</div>';
+
+  document.getElementById('aC').innerHTML=`
+    <div class="as"><div class="asi"><div class="ai">⚡</div><div class="av">${S.xp}</div><div class="al">总经验值</div></div><div class="asi"><div class="ai">🔥</div><div class="av">${S.sk}</div><div class="al">连续天数</div></div><div class="asi"><div class="ai">📚</div><div class="av">${S.kn.size}</div><div class="al">已掌握</div></div><div class="asi"><div class="ai">⭐</div><div class="av">${S.lv}</div><div class="al">当前等级</div></div></div>
+    ${cal}${tree}
+    <div style="font-size:14px;font-weight:800;margin-top:22px;margin-bottom:10px">🏅 成就徽章</div>
+    <div class="abs">${BG.map(b=>`<div class="ab ${S.bg[b.id]?'ul':''}"><div class="abi">${b.i}</div><div class="abn">${b.n}</div><div class="abd">${b.d}</div></div>`).join('')}</div>`}
+
+// ====== UTILS ======
+function shuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+// ====== INIT ======
+uCt();rFC();uTB();chB();
+</script>
+</body>
+</html>
