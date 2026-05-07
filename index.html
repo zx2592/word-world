@@ -263,6 +263,11 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 .lex-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lex-opt{background:#fff;border:3px solid var(--bg3);border-bottom:5px solid var(--bg4);border-radius:12px;padding:13px;font-family:inherit;font-size:13px;font-weight:800;color:var(--tx);text-align:left;cursor:pointer}.lex-opt:hover{border-color:var(--blu)}.lex-opt.ok{border-color:var(--grn);border-bottom-color:var(--grn2);background:var(--grn3);color:var(--grn2)}.lex-opt.ng{border-color:var(--red);border-bottom-color:var(--red2);background:var(--red3);color:var(--red2)}
 .lex-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}.lex-note{font-size:11px;color:var(--tx2)}.lex-next{background:var(--grn);border:none;border-bottom:4px solid var(--grn2);color:#fff;border-radius:12px;padding:9px 16px;font-family:inherit;font-weight:900;cursor:pointer}.lex-next:active{border-bottom-width:1px;transform:translateY(3px)}
 
+/* Entry gate */
+.gate{position:fixed;inset:0;z-index:999;background:linear-gradient(135deg,#f6f4ef,#ddf4fe);display:flex;align-items:center;justify-content:center;padding:20px}
+.gate.hide{display:none}.gate-box{width:min(360px,100%);background:#fff;border:3px solid var(--bg3);border-bottom:6px solid var(--bg4);border-radius:20px;padding:28px;box-shadow:var(--sh2);text-align:center}
+.gate-logo{width:54px;height:54px;margin:0 auto 12px;border-radius:16px;background:linear-gradient(135deg,var(--grn),#00c853);color:#fff;font-size:26px;font-weight:900;display:flex;align-items:center;justify-content:center}.gate-box h1{font-size:22px;margin-bottom:4px}.gate-box p{font-size:12px;color:var(--tx2);margin-bottom:16px}.gate-box input{width:100%;border:3px solid var(--bg3);border-radius:12px;padding:12px 14px;font-size:18px;text-align:center;font-family:inherit;font-weight:800;outline:none}.gate-box input:focus{border-color:var(--blu)}.gate-box button{width:100%;margin-top:10px}.gate-err{min-height:18px;margin-top:8px;color:var(--red);font-size:11px;font-weight:800}
+
 /* RESPONSIVE */
 @media(max-width:768px){
   .side{transform:translateX(-100%)}.side.op{transform:translateX(0);box-shadow:var(--sh2)}
@@ -275,6 +280,16 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 </style>
 </head>
 <body>
+<div class="gate" id="gateWrap">
+  <div class="gate-box">
+    <div class="gate-logo">V</div>
+    <h1>VocabStar</h1>
+    <p>请输入进入密码</p>
+    <input id="gatePass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')unlockGate()" autofocus>
+    <button class="btn btn-g" onclick="unlockGate()">进入学习</button>
+    <div class="gate-err" id="gateErr"></div>
+  </div>
+</div>
 <div class="ov" id="ov" onclick="tgS()"></div>
 <div class="app">
 <aside class="side" id="sb">
@@ -335,6 +350,13 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 </div>
 <script src="data/workshop-orange.js"></script>
 <script>
+// ====== ENTRY PASSWORD ======
+const PASS='mtty';
+function unlockGate(){const inp=document.getElementById('gatePass'),err=document.getElementById('gateErr');
+  if((inp.value||'')===PASS){localStorage.setItem('ww_gate','ok');document.getElementById('gateWrap').classList.add('hide')}
+  else{err.textContent='密码不正确';inp.value='';inp.focus()}}
+if(localStorage.getItem('ww_gate')==='ok')setTimeout(()=>document.getElementById('gateWrap').classList.add('hide'),0);
+
 // ====== WORD DATABASE ======
 const D=[
 {w:"abundant",ph:"/əˈbʌndənt/",ps:"adj.",em:"🌊",c:"ww",m:"<strong>丰富的，充裕的</strong>",ms:"丰富的",ex:"The region has <em>abundant</em> natural resources.",rt:[{t:"prefix",x:"ab-",m:"加强"},{t:"root",x:"und",m:"波浪"},{t:"suffix",x:"-ant",m:"形容词"}],ep:"波浪涌来→溢出→丰富",rl:["redundant","inundate","undulate"]},

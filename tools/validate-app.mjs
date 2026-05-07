@@ -44,6 +44,8 @@ assert.ok(html.includes('反义词'), 'flashcards should render antonyms');
 assert.ok(html.includes('visual-card'), 'flashcards should render visual image cards');
 assert.ok(html.includes('同义词练习'), 'UI should include the synonym exercise module');
 assert.ok(html.includes('反义词练习'), 'UI should include the antonym exercise module');
+assert.ok(html.includes('gateWrap'), 'UI should include a simple entry password gate');
+assert.ok(html.includes("PASS='mtty'"), 'password gate should check the requested password');
 assert.ok(sandbox.window.WORKSHOP_ORANGE.length >= 150, 'PDF extraction should provide the broader book vocabulary');
 assert.ok(sandbox.D.length >= 180, 'app should merge the broader book vocabulary into the runtime word database');
 
