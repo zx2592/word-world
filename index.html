@@ -349,6 +349,8 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 </div>
 </div>
 <script src="data/workshop-orange.js"></script>
+<script src="data/harkness-words.js"></script>
+<script src="data/image-words.js"></script>
 <script>
 // ====== ENTRY PASSWORD ======
 const PASS='mtty';
@@ -456,6 +458,37 @@ const D=[
       ms:(b.syn&&b.syn[0])?b.syn[0]:b.w,ex:`Choose the word that best matches or contrasts with <em>${b.w}</em>.`,
       img:`A Vocabulary Workshop card for ${b.w}.`,syn:(b.syn&&b.syn.length)?b.syn:["related idea"],ant:(b.ant&&b.ant.length)?b.ant:["opposite idea"],rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
       ep:`用同义词和反义词建立词义边界。`,rl:[...(b.syn||[]).slice(0,3),...(b.ant||[]).slice(0,2)],rev:{box:1,due:0}});
+  }
+});
+
+(window.HARKNESS_WORDS||[]).forEach((b,i)=>{
+  const old=D.find(w=>w.w===b.w),syn=(b.syn&&b.syn.length)?b.syn:["related idea"];
+  if(old){
+    old.syn=[...new Set([...(old.syn||[]),...syn])];
+    old.ms=old.ms||b.ms;old.book=true;old.source='Harkness';old.c='iu';
+  }else{
+    D.push({w:b.w,ph:"",ps:"word",em:["📚","🧠","✨","🔤"][i%4],c:"iu",book:true,source:"Harkness",
+      m:`<strong>${b.w}</strong>：${b.ms||syn[0]||"vocabulary word"}`,
+      ms:b.ms||syn[0]||b.w,ex:`Use <em>${b.w}</em> in a sentence that shows its meaning: ${b.ms||syn[0]}.`,
+      img:`A memory card for ${b.w}: ${b.ms||syn[0]}.`,syn,ant:["opposite idea"],
+      rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
+      ep:`用中文释义和近义线索建立记忆。`,rl:syn.slice(0,5),rev:{box:1,due:0}});
+  }
+});
+
+(window.IMAGE_WORDS||[]).forEach((b,i)=>{
+  const old=D.find(w=>w.w===b.w),syn=(b.syn&&b.syn.length)?b.syn:["related idea"],ant=(b.ant&&b.ant.length)?b.ant:["opposite idea"];
+  if(old){
+    old.syn=[...new Set([...(old.syn||[]),...syn])];
+    old.ant=[...new Set([...(old.ant||[]),...ant])];
+    old.ms=b.ms||old.ms;old.source='Image list';old.c='il';
+  }else{
+    D.push({w:b.w,ph:"",ps:"word",em:["📝","📖","⭐","🔍"][i%4],c:"il",book:true,source:"Image list",
+      m:`<strong>${b.w}</strong>：${b.ms||syn[0]}`,ms:b.ms||syn[0]||b.w,
+      ex:`Remember <em>${b.w}</em> through the cue: ${b.ms||syn[0]}.`,
+      img:`A memory cue for ${b.w}: ${b.ms||syn[0]}.`,syn,ant,
+      rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
+      ep:`图片词表：${b.w} ≈ ${syn[0]||"related idea"}`,rl:syn.slice(0,5),rev:{box:1,due:0}});
   }
 });
 

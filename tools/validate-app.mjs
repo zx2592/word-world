@@ -4,6 +4,8 @@ import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const workshopScript = fs.readFileSync(new URL('../data/workshop-orange.js', import.meta.url), 'utf8');
+const harknessScript = fs.readFileSync(new URL('../data/harkness-words.js', import.meta.url), 'utf8');
+const imageScript = fs.readFileSync(new URL('../data/image-words.js', import.meta.url), 'utf8');
 const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
 assert.ok(script, 'index.html should contain an inline script');
 
@@ -15,6 +17,8 @@ assert.ok(dataScript, 'word data should be extractable');
 const sandbox = { window: {} };
 vm.createContext(sandbox);
 vm.runInContext(workshopScript, sandbox);
+vm.runInContext(harknessScript, sandbox);
+vm.runInContext(imageScript, sandbox);
 vm.runInContext(dataScript + '\nthis.D=D; this.RT=RT;', sandbox);
 
 const requiredWords = [
@@ -47,6 +51,17 @@ assert.ok(html.includes('反义词练习'), 'UI should include the antonym exerc
 assert.ok(html.includes('gateWrap'), 'UI should include a simple entry password gate');
 assert.ok(html.includes("PASS='mtty'"), 'password gate should check the requested password');
 assert.ok(sandbox.window.WORKSHOP_ORANGE.length >= 150, 'PDF extraction should provide the broader book vocabulary');
+assert.ok(sandbox.window.HARKNESS_WORDS.length >= 1000, 'Harkness PDF extraction should provide the broader custom vocabulary');
+assert.ok(sandbox.window.IMAGE_WORDS.length >= 45, 'image extraction should provide the manually verified image vocabulary');
+for (const word of ['humidity', 'fretful', 'barrage', 'tyrannical', 'herculean', 'belligerent']) {
+  assert.ok(sandbox.D.some((entry) => entry.w === word), `missing custom word: ${word}`);
+}
+for (const word of ['humidity', 'herculean', 'belligerent']) {
+  assert.equal(sandbox.D.find((entry) => entry.w === word)?.c, 'il', `image word should be ISEE Lower: ${word}`);
+}
+for (const word of ['abandon', 'abbreviate', 'hypothesis']) {
+  assert.equal(sandbox.D.find((entry) => entry.w === word)?.c, 'iu', `PDF word should be ISEE Upper: ${word}`);
+}
 assert.ok(sandbox.D.length >= 180, 'app should merge the broader book vocabulary into the runtime word database');
 
 console.log(`Validated ${sandbox.D.length} words and ${sandbox.RT.length} root-map nodes.`);
