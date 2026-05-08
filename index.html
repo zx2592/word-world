@@ -556,7 +556,10 @@ function go(s,el){
 }
 function tgS(){document.getElementById('sb').classList.toggle('op');document.getElementById('ov').classList.toggle('sh')}
 function clS(){document.getElementById('sb').classList.remove('op');document.getElementById('ov').classList.remove('sh')}
-function setC(c,el){S.c=c;S.fi=0;document.querySelectorAll('.cfb').forEach(x=>x.classList.remove('on'));el.classList.add('on');rFC();sv()}
+function setC(c,el){S.c=c;S.fi=0;document.querySelectorAll('.cfb').forEach(x=>x.classList.remove('on'));el.classList.add('on');rFC();
+  const active=document.querySelector('.sec.on')?.id;
+  if(active==='s-qz')initQ();if(active==='s-syn')initLex('syn');if(active==='s-ant')initLex('ant');
+  sv()}
 function addXP(n){const td=new Date().toISOString().slice(0,10);S.xp+=n;S.tdxp+=n;S.ad.add(td);if(S.ld!==td){S.sk++;S.ld=td}else{S.ld=td}S.lv=Math.floor(S.xp/100)+1;uTB();chB();sv()}
 function uTB(){
   document.getElementById('xpV').textContent=S.xp;document.getElementById('skV').textContent=S.sk;document.getElementById('lvV').textContent=S.lv;
@@ -649,7 +652,7 @@ function rQR(){const pct=Math.round(S.qs/S.qw.length*100);const cls=pct>=80?'g':
 
 // ====== SYNONYM / ANTONYM WORKSHOP ======
 let L={syn:{mode:'word',i:0,ok:0,total:0,cur:null,done:false},ant:{mode:'word',i:0,ok:0,total:0,cur:null,done:false}};
-function lexWords(type){return D.filter(w=>Array.isArray(w[type])&&w[type].length&&w.w&&w.syn?.length&&w.ant?.length)}
+function lexWords(type){return gF().filter(w=>Array.isArray(w[type])&&w[type].length&&w.w&&w.syn?.length&&w.ant?.length)}
 function lexAll(type){return [...new Set(lexWords(type).flatMap(w=>w[type]).filter(Boolean))]}
 function initLex(type){const st=L[type];st.i=0;st.ok=0;st.total=10;st.done=false;rLex(type)}
 function setLexMode(type,mode){L[type].mode=mode;initLex(type)}
