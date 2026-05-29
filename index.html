@@ -351,6 +351,7 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 <script src="data/workshop-orange.js"></script>
 <script src="data/harkness-words.js"></script>
 <script src="data/image-words.js"></script>
+<script src="data/phonetics.js"></script>
 <script>
 // ====== ENTRY PASSWORD ======
 const PASS='mtty';
@@ -491,6 +492,9 @@ const D=[
       ep:`图片词表：${b.w} ≈ ${syn[0]||"related idea"}`,rl:syn.slice(0,5),rev:{box:1,due:0}});
   }
 });
+
+const PH=window.PHONETICS||{};
+D.forEach(w=>{if(!w.ph&&PH[w.w])w.ph=PH[w.w]});
 
 const RT=[
 {r:"scrib/script",m:"写 write",t:"root",ws:["circumscribe","describe","inscribe"]},

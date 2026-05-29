@@ -6,6 +6,7 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const workshopScript = fs.readFileSync(new URL('../data/workshop-orange.js', import.meta.url), 'utf8');
 const harknessScript = fs.readFileSync(new URL('../data/harkness-words.js', import.meta.url), 'utf8');
 const imageScript = fs.readFileSync(new URL('../data/image-words.js', import.meta.url), 'utf8');
+const phoneticsScript = fs.readFileSync(new URL('../data/phonetics.js', import.meta.url), 'utf8');
 const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
 assert.ok(script, 'index.html should contain an inline script');
 
@@ -19,6 +20,7 @@ vm.createContext(sandbox);
 vm.runInContext(workshopScript, sandbox);
 vm.runInContext(harknessScript, sandbox);
 vm.runInContext(imageScript, sandbox);
+vm.runInContext(phoneticsScript, sandbox);
 vm.runInContext(dataScript + '\nthis.D=D; this.RT=RT;', sandbox);
 
 const requiredWords = [
@@ -40,6 +42,7 @@ for (const entry of sandbox.D) {
   assert.ok(Array.isArray(entry.syn) && entry.syn.length > 0, `${entry.w} should include synonyms`);
   assert.ok(Array.isArray(entry.ant) && entry.ant.length > 0, `${entry.w} should include antonyms`);
   assert.ok(entry.rev, `${entry.w} should include review metadata`);
+  assert.ok(typeof entry.ph === 'string' && entry.ph.trim().length > 0, `${entry.w} should include a phonetic`);
 }
 
 assert.ok(html.includes('复习提醒'), 'UI should include adaptive review reminders');
