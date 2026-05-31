@@ -6,6 +6,8 @@ const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const workshopScript = fs.readFileSync(new URL('../data/workshop-orange.js', import.meta.url), 'utf8');
 const harknessScript = fs.readFileSync(new URL('../data/harkness-words.js', import.meta.url), 'utf8');
 const imageScript = fs.readFileSync(new URL('../data/image-words.js', import.meta.url), 'utf8');
+const iseeLowerScript = fs.readFileSync(new URL('../data/isee-lower.js', import.meta.url), 'utf8');
+const iseeUpperScript = fs.readFileSync(new URL('../data/isee-upper.js', import.meta.url), 'utf8');
 const phoneticsScript = fs.readFileSync(new URL('../data/phonetics.js', import.meta.url), 'utf8');
 const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
 assert.ok(script, 'index.html should contain an inline script');
@@ -20,6 +22,8 @@ vm.createContext(sandbox);
 vm.runInContext(workshopScript, sandbox);
 vm.runInContext(harknessScript, sandbox);
 vm.runInContext(imageScript, sandbox);
+vm.runInContext(iseeLowerScript, sandbox);
+vm.runInContext(iseeUpperScript, sandbox);
 vm.runInContext(phoneticsScript, sandbox);
 vm.runInContext(dataScript + '\nthis.D=D; this.RT=RT;', sandbox);
 
@@ -69,7 +73,19 @@ for (const word of ['humidity', 'herculean', 'belligerent']) {
 for (const word of ['abandon', 'abbreviate', 'hypothesis']) {
   assert.equal(sandbox.D.find((entry) => entry.w === word)?.c, 'iu', `PDF word should be ISEE Upper: ${word}`);
 }
-assert.ok(sandbox.D.length >= 180, 'app should merge the broader book vocabulary into the runtime word database');
+assert.ok(sandbox.window.ISEE_LOWER.length >= 500, 'lower-PDF extraction should provide the ISEE Lower vocabulary');
+assert.ok(sandbox.window.ISEE_UPPER.length >= 1000, 'upper-source extraction should provide the ISEE Upper vocabulary');
+for (const word of ['abstruse', 'slumber', 'populate']) {
+  assert.equal(sandbox.D.find((entry) => entry.w === word)?.c, 'il', `ISEE Lower word should be il: ${word}`);
+}
+for (const word of ['abdicate', 'zenith', 'avarice']) {
+  assert.equal(sandbox.D.find((entry) => entry.w === word)?.c, 'iu', `ISEE Upper word should be iu: ${word}`);
+}
+// hand-crafted cards keep their original group even when an ISEE source repeats them
+for (const [word, cat] of [['advocate', 'iu'], ['agile', 'ww'], ['analyze', 'ww'], ['benevolent', 'vw']]) {
+  assert.equal(sandbox.D.find((entry) => entry.w === word)?.c, cat, `curated card should stay ${cat}: ${word}`);
+}
+assert.ok(sandbox.D.length >= 4000, 'app should merge the broader book vocabulary into the runtime word database');
 
 const counts = sandbox.D.reduce((acc, entry) => {
   acc[entry.c] = (acc[entry.c] || 0) + 1;

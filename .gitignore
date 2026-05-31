@@ -1,0 +1,4 @@
+# Local source material for vocabulary extraction (regenerate data/ from these)
+books/
+# Local task notes
+tasks/

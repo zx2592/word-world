@@ -351,6 +351,8 @@ body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:v
 <script src="data/workshop-orange.js"></script>
 <script src="data/harkness-words.js"></script>
 <script src="data/image-words.js"></script>
+<script src="data/isee-lower.js"></script>
+<script src="data/isee-upper.js"></script>
 <script src="data/phonetics.js"></script>
 <script>
 // ====== ENTRY PASSWORD ======
@@ -447,6 +449,9 @@ const D=[
 {w:"dispose",ph:"/dɪˈspoʊz/",ps:"v.",em:"🧺",c:"ww",m:"<strong>放置；安排；处理</strong>",ms:"处理/安排",ex:"We were told to <em>dispose</em> our bags under our seats.",img:"Bags neatly placed under seats.",syn:["arrange","order","organize"],ant:["disturb","scatter","disorganize"],rt:[{t:"prefix",x:"dis-",m:"分开"},{t:"root",x:"pose",m:"放"}],ep:"把东西分开放好→安排/处理",rl:["position","deposit","compose"],rev:{box:1,due:0}}
 ].map(w=>({...w,img:w.img||`${w.em||'✨'} visual memory scene for ${w.w}`,syn:w.syn||w.rl||["related word"],ant:w.ant||["opposite idea"],rev:w.rev||{box:1,due:0}}));
 
+// Hand-crafted cards keep their original group; only bundled imports get re-tagged by source file.
+const CURATED=new Set(D.map(w=>w.w));
+
 (window.WORKSHOP_ORANGE||[]).forEach((b,i)=>{
   const old=D.find(w=>w.w===b.w);
   if(old){
@@ -466,7 +471,7 @@ const D=[
   const old=D.find(w=>w.w===b.w),syn=(b.syn&&b.syn.length)?b.syn:["related idea"];
   if(old){
     old.syn=[...new Set([...(old.syn||[]),...syn])];
-    old.ms=old.ms||b.ms;old.book=true;old.source='Harkness';old.c='iu';
+    old.ms=old.ms||b.ms;old.book=true;if(old.c!=='ww'&&old.c!=='vw'&&!CURATED.has(old.w)){old.source='Harkness';old.c='iu'}
   }else{
     D.push({w:b.w,ph:"",ps:"word",em:["📚","🧠","✨","🔤"][i%4],c:"iu",book:true,source:"Harkness",
       m:`<strong>${b.w}</strong>：${b.ms||syn[0]||"vocabulary word"}`,
@@ -482,7 +487,7 @@ const D=[
   if(old){
     old.syn=[...new Set([...(old.syn||[]),...syn])];
     old.ant=[...new Set([...(old.ant||[]),...ant])];
-    old.ms=b.ms||old.ms;old.source='Image list';old.c='il';
+    old.ms=b.ms||old.ms;if(old.c!=='ww'&&old.c!=='vw'&&!CURATED.has(old.w)){old.source='Image list';old.c='il'}
   }else{
     D.push({w:b.w,ph:"",ps:"word",em:["📝","📖","⭐","🔍"][i%4],c:"il",book:true,source:"Image list",
       m:`<strong>${b.w}</strong>：${b.ms||syn[0]}`,ms:b.ms||syn[0]||b.w,
@@ -490,6 +495,38 @@ const D=[
       img:`A memory cue for ${b.w}: ${b.ms||syn[0]}.`,syn,ant,
       rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
       ep:`图片词表：${b.w} ≈ ${syn[0]||"related idea"}`,rl:syn.slice(0,5),rev:{box:1,due:0}});
+  }
+});
+
+(window.ISEE_LOWER||[]).forEach((b,i)=>{
+  const old=D.find(w=>w.w===b.w),syn=(b.syn&&b.syn.length)?b.syn:["related idea"];
+  if(old){
+    old.syn=[...new Set([...(old.syn||[]),...syn])];
+    old.ms=old.ms||b.ms;old.book=true;if(b.ph&&!old.ph)old.ph=b.ph;
+    if(old.c!=='ww'&&old.c!=='vw'&&!CURATED.has(old.w)){old.c='il';old.source='ISEE Lower'}
+  }else{
+    D.push({w:b.w,ph:b.ph||"",ps:"word",em:["📗","🌱","🔤","⭐"][i%4],c:"il",book:true,source:"ISEE Lower",
+      m:`<strong>${b.w}</strong>：${b.ms||syn[0]}`,ms:b.ms||syn[0]||b.w,
+      ex:`Use <em>${b.w}</em> in a sentence that shows its meaning: ${b.ms||syn[0]}.`,
+      img:`A memory card for ${b.w}: ${b.ms||syn[0]}.`,syn,ant:["opposite idea"],
+      rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
+      ep:`ISEE Lower：${b.w} ≈ ${syn[0]||"related idea"}`,rl:syn.slice(0,5),rev:{box:1,due:0}});
+  }
+});
+
+(window.ISEE_UPPER||[]).forEach((b,i)=>{
+  const old=D.find(w=>w.w===b.w),syn=(b.syn&&b.syn.length)?b.syn:["related idea"];
+  if(old){
+    old.syn=[...new Set([...(old.syn||[]),...syn])];
+    old.ms=old.ms||b.ms;old.book=true;if(b.ph&&!old.ph)old.ph=b.ph;
+    if(old.c!=='ww'&&old.c!=='vw'&&!CURATED.has(old.w)){old.c='iu';old.source='ISEE Upper'}
+  }else{
+    D.push({w:b.w,ph:b.ph||"",ps:"word",em:["📙","🧠","✨","🔤"][i%4],c:"iu",book:true,source:"ISEE Upper",
+      m:`<strong>${b.w}</strong>：${b.ms||syn[0]}`,ms:b.ms||syn[0]||b.w,
+      ex:`Use <em>${b.w}</em> in a sentence that shows its meaning: ${b.ms||syn[0]}.`,
+      img:`A memory card for ${b.w}: ${b.ms||syn[0]}.`,syn,ant:["opposite idea"],
+      rt:[{t:"root",x:b.w.slice(0,Math.min(5,b.w.length)),m:"核心词"}],
+      ep:`ISEE Upper：${b.w} ≈ ${syn[0]||"related idea"}`,rl:syn.slice(0,5),rev:{box:1,due:0}});
   }
 });
 

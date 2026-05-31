@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const root = new URL('..', import.meta.url);
-const dataFiles = ['data/workshop-orange.js', 'data/harkness-words.js', 'data/image-words.js'];
+const dataFiles = ['data/workshop-orange.js', 'data/harkness-words.js', 'data/image-words.js', 'data/isee-lower.js', 'data/isee-upper.js'];
 const cachePath = new URL('tools/.phonetics-cache.json', root);
 const outPath = new URL('data/phonetics.js', root);
 
@@ -23,6 +23,8 @@ const sources = [
   ...(sandbox.window.WORKSHOP_ORANGE || []),
   ...(sandbox.window.HARKNESS_WORDS || []),
   ...(sandbox.window.IMAGE_WORDS || []),
+  ...(sandbox.window.ISEE_LOWER || []),
+  ...(sandbox.window.ISEE_UPPER || []),
 ];
 const words = [...new Set(sources.map((e) => e.w).filter(Boolean))].sort();
 console.log(`Collected ${words.length} unique words from ${dataFiles.length} sources.`);
